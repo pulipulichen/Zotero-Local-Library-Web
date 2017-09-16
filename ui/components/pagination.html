@@ -1,0 +1,51 @@
+<div class="ui pagination menu">
+    <check if="{{ count(@pagination_first) > 0 }}">
+        <repeat group="{{ @pagination_first }}" value="{{ @p }}">
+            <a class="item">
+                {{ @p }}
+            </a>
+        </repeat>
+    </check>
+    <check if="{{ count(@pagination_before_skip) > 0 }}">
+        <repeat group="{{ @pagination_before_skip }}" value="{{ @p }}">
+            <a class="item disabled">
+                {{ @p }}
+            </a>
+        </repeat>
+    </check>
+    <check if="{{ count(@pagination_before) > 0 }}">
+        <repeat group="{{ @pagination_before }}" value="{{ @p }}">
+            <a class="item">
+                {{ @p }}
+            </a>
+        </repeat>
+    </check>
+    <check if="{{ count(@pagination_current) > 0 }}">
+        <repeat group="{{ @pagination_current }}" value="{{ @p }}">
+            <a class="item active">
+                {{ @p }}
+            </a>
+        </repeat>
+    </check>
+    <check if="{{ count(@$pagination_after) > 0 }}">
+        <repeat group="{{ @$pagination_after }}" value="{{ @p }}">
+            <a class="item ">
+                {{ @p }}
+            </a>
+        </repeat>
+    </check>
+    <check if="{{ count(@pagination_after_skip) > 0 }}">
+        <repeat group="{{ @pagination_after_skip }}" value="{{ @p }}">
+            <a class="item disabled">
+                {{ @p }}
+            </a>
+        </repeat>
+    </check>
+    <check if="{{ count(@pagination_last) > 0 }}">
+        <repeat group="{{ @pagination_last }}" value="{{ @p }}">
+            <a class="item">
+                {{ @p }}
+            </a>
+        </repeat>
+    </check>
+</div>
