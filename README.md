@@ -2,10 +2,16 @@
 A PHP website to search Zotero's local database (zotero.sqlite).
 
 # TODO list
+- 沒有檔案的，就不列出來
 - 要把書本的Google Drive連結加上去
 - 書影？
 - ToRead, ReadSkip, ReadFinish標籤的變化
+- 搜尋要能搜尋note裡面的文字
+- [book] [journal & conference]
 
+# Test
+- 王者歸來: WEKA機器學習與大數據聖經
+- http://localhost/public/Zotero-Local-Library-Web/item/17392
 
 # Development tips
 - Semantic UI: https://semantic-ui.com/usage/layout.html

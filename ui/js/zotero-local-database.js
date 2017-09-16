@@ -4,12 +4,18 @@ $(function () {
         $(".top.menu .item.back").hide();
         $(".top.menu .item.home").show();
     }
+    
+    $('.attachments.list a.item').click(function () {
+        $(this).addClass("clicked");
+    });
 });
 
 item_open_all = function () {
     if (window.confirm("You will open many windows. Are you sure?")) {
         $('.attachments.list a').each(function (_i, _ele) {
-            window.open(_ele.href);
+            setTimeout(function () {
+                window.open(_ele.href);
+            }, _i * 5000)
         });
     }
 };

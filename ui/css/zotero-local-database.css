@@ -2,3 +2,11 @@
 .content .meta b{
     background-color: yellow;
 }
+
+.attachments.list a.item:visited div.header  {
+    color: #551A8B;
+}
+
+.attachments.list a.item.clicked {
+    background-color: #e6e6e6;
+}
