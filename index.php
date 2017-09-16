@@ -11,6 +11,7 @@ if ((float)PCRE_VERSION<7.9) {
 // Load configuration
 $f3->config('config.ini');
 
+/*
 $f3->route('GET /',
 	function($f3) {
 		$classes=array(
@@ -76,6 +77,7 @@ $f3->route('GET /',
 		echo View::instance()->render('layout.htm');
 	}
 );
+*/
 
 $f3->route('GET /userref',
 	function($f3) {
@@ -83,5 +85,7 @@ $f3->route('GET /userref',
 		echo View::instance()->render('layout.htm');
 	}
 );
+
+include 'routing.php';
 
 $f3->run();
