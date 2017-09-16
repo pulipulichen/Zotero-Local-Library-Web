@@ -5,7 +5,7 @@
                 <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
             </div>
             <div class="content">
-                <a class="header">{{ @item.item_title }}</a>
+                <div class="header">{{ @item.item_title }}</div>
                 <div class="meta">
                     <span>
                         {{ @item.item_creators }} 
@@ -21,7 +21,7 @@
 <div class="ui relaxed divided link selection list">
     <repeat group="{{ @attachment_collection }}" value="{{ @attachment }}">
         <a class="item" target="_blank"
-               href="https://drive.google.com/drive/u/0/search?q=type:folder%20{{ @attachment.attachment_key }}">
+               href="https://drive.google.com/drive/u/0/search?q={{ @attachment.attachment_key }}%20type:folder">
             <i class="file pdf outline icon"></i>
             <div class="content">
                 <div class="header">{{ @attachment.attachment_title }}</div>

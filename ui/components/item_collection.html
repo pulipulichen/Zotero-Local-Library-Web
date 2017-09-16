@@ -1,10 +1,12 @@
 <div class="ui divided items">
     <repeat group="{{ @item_collection }}" value="{{ @item }}">
         <div class="item">
+            
+            
             <div class="image" style="width: 50px;">
                 <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
             </div>
-            <div class="content">
+            <div class="content" style="width: 100%;">
                 <a class="header" 
                        href="{{ @BASEURL }}/item/{{ @item.item_id }}">{{ @item.item_title | raw }}</a>
                 <div class="meta">
@@ -22,13 +24,15 @@
                     Additional Details
                 </div>
                 -->
-                <div class="extra">
-                    <a class="ui right floated primary button"
-                       href="{{ @BASEURL }}/item/{{ @item.item_id }}">
-                        Attachments
-                        <i class="right chevron icon"></i>
-                    </a>
-                </div>
+                
+                
+            </div>
+            <div class="extra" style="float:right;">
+                <a class="ui right floated primary button"
+                   href="{{ @BASEURL }}/item/{{ @item.item_id }}">
+                    Attachments
+                    <i class="right chevron icon"></i>
+                </a>
             </div>
         </div>
     </repeat>
