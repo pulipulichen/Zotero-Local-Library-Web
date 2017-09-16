@@ -9,53 +9,19 @@ class ZoteroLocalDatabase {
         echo \Template::instance()->render('layout/header.html');
         $page = $f3->get('PARAMS.page');
         $page_limit = $f3->get('PAGE_LIMIT');
-        if (is_null($page)) {
+        $items_count = $this->get_items_count($f3);
+        if (is_null($page) || $page > ceil($items_count / $page_limit)) {
             $page = 1;
         }
-        echo "page: " . $page;
+        $offset = ($page-1) * $page_limit;
         
-        $rows = $f3->db->exec("SELECT
-itemTitle.itemID as item_id,
-itemTitle.value as item_title, 
-group_concat(itemCreators.lastName, ', ') as item_creators,
-substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
-itemTitle.dateModified as item_modified_date
-FROM
-(items
-left join itemData using(itemID) 
-left join itemDataValues using(valueID)
-left join fields using(fieldID)) as itemTitle,
-(items
-left join itemData using(itemID) 
-left join itemDataValues using(valueID)
-left join fields using(fieldID)) as itemDate,
-(items
-left join itemCreators using(itemID) 
-left join creators using(creatorID)) as itemCreators
-WHERE itemTitle.itemID = 689
-and itemTitle.itemID = itemDate.itemID
-and itemTitle.itemID = itemCreators.itemID
-and itemTitle.fieldID = 110
-and itemDate.fieldID = 14
-and itemCreators.creatorTypeID = 1
-ORDER BY
-itemTitle.dateModified DESC");
-        /*
-        $items_collection = array();
-        foreach ($rows as $row) {
-            $items_collection[] = $row;
-            
-            $f3->set('item_title', $row['item_title']);
-            $f3->set('item_creators', $row['item_creators']);
-            $f3->set('item_date', $row['item_date']);
-            $f3->set('item_modified_date', $row['item_modified_date']);
-            echo \Template::instance()->render('components/item.html');
-        }
-        */
-        $f3->set('item_collection', $rows);
+        $f3->set('item_collection', $this->get_item_collection($f3, $offset));
+        
+        $this->pagination($f3, $page, $items_count);
+        
         echo \Template::instance()->render('components/item_collection.html');
         
-        $this->pagination($f3, $page, 998);
+        $this->pagination($f3, $page, $items_count);
         
         echo \Template::instance()->render('layout/footer.html');
     }
@@ -115,5 +81,82 @@ itemTitle.dateModified DESC");
         $f3->set('pagination_last', $pagination_last);
         
         echo \Template::instance()->render('components/pagination.html');
+    }
+    
+    function get_item_collection($f3, $offset = 0, $item_id = NULL) {
+        $page_limit = $f3->get('PAGE_LIMIT');
+        
+        $where_item_id = "";
+        if (is_null($item_id) === FALSE) {
+            $where_item_id = 'AND item_id = ' . $item_id;
+            $offset = 0;
+        }
+        
+        $sql = "SELECT
+itemTitle.itemID as item_id,
+itemTitle.value AS item_title, 
+itemCreators.item_creators AS item_creators,
+substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
+itemTitle.dateModified AS item_modified_date
+FROM
+(items
+left join itemData using(itemID) 
+left join itemDataValues using(valueID)
+left join fields using(fieldID)) as itemTitle,
+(items
+left join itemData using(itemID) 
+left join itemDataValues using(valueID)
+left join fields using(fieldID)) as itemDate,
+(select 
+    items.itemID,
+    group_concat(creators.lastName, ', ') as item_creators
+    FROM 
+    items
+    left join itemCreators using(itemID) 
+    left join creators using(creatorID)
+    where creatorTypeID = 1
+    group by itemID
+    order by orderIndex) as itemCreators
+
+WHERE
+itemTitle.itemID = itemDate.itemID
+and itemTitle.itemID = itemCreators.itemID
+and itemTitle.itemTypeID = 2
+and itemTitle.fieldID = 110
+and itemDate.fieldID = 14
+" . $where_item_id . "
+ORDER BY
+itemTitle.dateModified DESC
+LIMIT " . $offset . ", " . $page_limit;
+        
+        //echo '<textarea>' . $sql . '</textarea>';
+        
+        $rows = $f3->db->exec($sql);
+        /*
+        $items_collection = array();
+        foreach ($rows as $row) {
+            $items_collection[] = $row;
+            
+            $f3->set('item_title', $row['item_title']);
+            $f3->set('item_creators', $row['item_creators']);
+            $f3->set('item_date', $row['item_date']);
+            $f3->set('item_modified_date', $row['item_modified_date']);
+            echo \Template::instance()->render('components/item.html');
+        }
+        */
+        return $rows;
+    }
+    
+    function get_items_count($f3) {
+        $rows = $f3->db->exec("select count(attachments_count) as items_count
+from (
+select count(items.itemID) as attachments_count
+from items
+join itemAttachments 
+on items.itemID = itemAttachments.parentItemID 
+and itemAttachments.contentType = 'application/pdf'
+and items.itemTypeID = 2
+group by items.itemID) as a");
+        return $rows[0]["items_count"];
     }
 }
