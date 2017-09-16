@@ -1,8 +1,8 @@
 SELECT
-itemTitle.value as field_title, 
-group_concat(itemCreators.lastName, ', ') as field_creators,
-substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS field_date,
-itemTitle.dateModified as field_modefied_date
+itemTitle.value AS item_title, 
+itemCreators.item_creators AS item_creators,
+substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
+itemTitle.dateModified AS item_modified_date
 FROM
 (items
 left join itemData using(itemID) 
@@ -12,14 +12,22 @@ left join fields using(fieldID)) as itemTitle,
 left join itemData using(itemID) 
 left join itemDataValues using(valueID)
 left join fields using(fieldID)) as itemDate,
-(items
-left join itemCreators using(itemID) 
-left join creators using(creatorID)) as itemCreators
+(select 
+    items.itemID,
+    group_concat(creators.lastName, ', ') as item_creators
+    FROM 
+    items
+    left join itemCreators using(itemID) 
+    left join creators using(creatorID)
+    where creatorTypeID = 1
+    group by itemID
+    order by orderIndex) as itemCreators
+
 WHERE itemTitle.itemID = 689
 and itemTitle.itemID = itemDate.itemID
 and itemTitle.itemID = itemCreators.itemID
 and itemTitle.fieldID = 110
 and itemDate.fieldID = 14
-and itemCreators.creatorTypeID = 1
+
 ORDER BY
 itemTitle.dateModified DESC

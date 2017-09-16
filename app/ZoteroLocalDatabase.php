@@ -2,7 +2,7 @@
 class ZoteroLocalDatabase {
     function index($f3) {
         $f3->set('page_title', 'Zotero Local Database');
-        echo \Template::instance()->render('header.html');
+        echo \Template::instance()->render('layout/header.html');
         
         $rows = $f3->db->exec("SELECT
 itemTitle.value as item_title, 
@@ -29,15 +29,22 @@ and itemDate.fieldID = 14
 and itemCreators.creatorTypeID = 1
 ORDER BY
 itemTitle.dateModified DESC");
+        /*
+        $items_collection = array();
         foreach ($rows as $row) {
+            $items_collection[] = $row;
+            
             $f3->set('item_title', $row['item_title']);
             $f3->set('item_creators', $row['item_creators']);
             $f3->set('item_date', $row['item_date']);
             $f3->set('item_modified_date', $row['item_modified_date']);
             echo \Template::instance()->render('components/item.html');
         }
+        */
+        $f3->set('item_collection', $rows);
+        echo \Template::instance()->render('components/item_collection.html');
         echo "ok";
         
-        echo \Template::instance()->render('footer.html');
+        echo \Template::instance()->render('layout/footer.html');
     }
 }

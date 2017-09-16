@@ -1,0 +1,27 @@
+<div class="ui items">
+    <repeat group="{{ @item_collection }}" value="{{ @item }}">
+        <div class="item">
+            <div class="image">
+                <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
+            </div>
+            <div class="content">
+                <a class="header">{{ @item.item_title }}</a>
+                <div class="meta">
+                    <span>
+                        {{ @item.item_creators }} 
+                        ({{ @item.item_date }})
+                        / Last modified: {{ @item.item_modified_date }}
+                    </span>
+                </div>
+                <!--
+                <div class="description">
+                    <p></p>
+                </div>
+                <div class="extra">
+                    Additional Details
+                </div>
+                -->
+            </div>
+        </div>
+    </repeat>
+</div>
