@@ -1,4 +1,4 @@
-<div class="ui items">
+<div class="ui divided items">
     <repeat group="{{ @item_collection }}" value="{{ @item }}">
         <div class="item">
             <div class="image">
@@ -21,6 +21,13 @@
                     Additional Details
                 </div>
                 -->
+                <div class="extra">
+                    <a class="ui right floated primary button"
+                       href="{{ @BASEURL }}/item/{{ @item.item_id }}">
+                        Attachments
+                        <i class="right chevron icon"></i>
+                    </a>
+                </div>
             </div>
         </div>
     </repeat>

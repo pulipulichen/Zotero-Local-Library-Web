@@ -5,6 +5,7 @@ class ZoteroLocalDatabase {
         echo \Template::instance()->render('layout/header.html');
         
         $rows = $f3->db->exec("SELECT
+itemTitle.itemID as item_id,
 itemTitle.value as item_title, 
 group_concat(itemCreators.lastName, ', ') as item_creators,
 substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
