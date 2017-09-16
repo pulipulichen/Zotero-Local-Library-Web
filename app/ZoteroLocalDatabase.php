@@ -1,13 +1,14 @@
 <?php
 class ZoteroLocalDatabase {
     function index($f3) {
-        $f3->set('title', 'Zotero Local Database');
+        $f3->set('page_title', 'Zotero Local Database');
         echo \Template::instance()->render('header.html');
         
         $rows = $f3->db->exec("SELECT
-itemTitle.value as field_title, 
-group_concat(itemCreators.lastName, ', ') as field_creators,
-substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS field_date
+itemTitle.value as item_title, 
+group_concat(itemCreators.lastName, ', ') as item_creators,
+substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
+itemTitle.dateModified as item_modified_date
 FROM
 (items
 left join itemData using(itemID) 
@@ -20,17 +21,22 @@ left join fields using(fieldID)) as itemDate,
 (items
 left join itemCreators using(itemID) 
 left join creators using(creatorID)) as itemCreators
-WHERE itemTitle.itemID = 1
+WHERE itemTitle.itemID = 689
 and itemTitle.itemID = itemDate.itemID
 and itemTitle.itemID = itemCreators.itemID
 and itemTitle.fieldID = 110
 and itemDate.fieldID = 14
-and itemCreators.creatorTypeID = 1");
+and itemCreators.creatorTypeID = 1
+ORDER BY
+itemTitle.dateModified DESC");
         foreach ($rows as $row) {
-            echo $row['itemID']."<br />";
+            $f3->set('item_title', $row['item_title']);
+            $f3->set('item_creators', $row['item_creators']);
+            $f3->set('item_date', $row['item_date']);
+            $f3->set('item_modified_date', $row['item_modified_date']);
+            echo \Template::instance()->render('components/item.html');
         }
         echo "ok";
-        
         
         echo \Template::instance()->render('footer.html');
     }
