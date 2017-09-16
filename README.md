@@ -2,8 +2,10 @@
 A PHP website to search Zotero's local database (zotero.sqlite).
 
 # TODO list
-- 總之，先把書本的 [標題] - [作者] (年代) 列出來吧
+- 要把書本的Google Drive連結加上去
 - 書影？
+- ToRead, ReadSkip, ReadFinish標籤的變化
+
 
 # Development tips
 - Semantic UI: https://semantic-ui.com/usage/layout.html

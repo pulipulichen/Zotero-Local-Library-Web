@@ -5,3 +5,11 @@ $(function () {
         $(".top.menu .item.home").show();
     }
 });
+
+item_open_all = function () {
+    if (window.confirm("You will open many windows. Are you sure?")) {
+        $('.attachments.list a').each(function (_i, _ele) {
+            window.open(_ele.href);
+        });
+    }
+};
