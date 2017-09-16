@@ -55,7 +55,7 @@ itemTitle.dateModified DESC");
         $f3->set('item_collection', $rows);
         echo \Template::instance()->render('components/item_collection.html');
         
-        $this->pagination($f3, 100, 998);
+        $this->pagination($f3, $page, 998);
         
         echo \Template::instance()->render('layout/footer.html');
     }

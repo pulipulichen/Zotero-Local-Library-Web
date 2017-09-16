@@ -1,7 +1,8 @@
+<div style="text-align: center">
 <div class="ui pagination menu">
     <check if="{{ count(@pagination_first) > 0 }}">
         <repeat group="{{ @pagination_first }}" value="{{ @p }}">
-            <a class="item">
+            <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}">
                 {{ @p }}
             </a>
         </repeat>
@@ -15,21 +16,21 @@
     </check>
     <check if="{{ count(@pagination_before) > 0 }}">
         <repeat group="{{ @pagination_before }}" value="{{ @p }}">
-            <a class="item">
+            <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}">
                 {{ @p }}
             </a>
         </repeat>
     </check>
     <check if="{{ count(@pagination_current) > 0 }}">
         <repeat group="{{ @pagination_current }}" value="{{ @p }}">
-            <a class="item active">
+            <a class="item active" href="{{ @BASEURL }}/item_collection/{{@p}}">
                 {{ @p }}
             </a>
         </repeat>
     </check>
     <check if="{{ count(@$pagination_after) > 0 }}">
         <repeat group="{{ @$pagination_after }}" value="{{ @p }}">
-            <a class="item ">
+            <a class="item " href="{{ @BASEURL }}/item_collection/{{@p}}">
                 {{ @p }}
             </a>
         </repeat>
@@ -43,9 +44,10 @@
     </check>
     <check if="{{ count(@pagination_last) > 0 }}">
         <repeat group="{{ @pagination_last }}" value="{{ @p }}">
-            <a class="item">
+            <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}">
                 {{ @p }}
             </a>
         </repeat>
     </check>
+</div>
 </div>
