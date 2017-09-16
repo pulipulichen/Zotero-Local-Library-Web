@@ -7,6 +7,7 @@
         <script src="{{ @BASEURL }}/ui/js/jquery-3.2.1.min.js"></script>
         <link rel="stylesheet" type="text/css" href="{{ @BASEURL }}/ui/css/semantic-ui/semantic.min.css">
         <link rel="icon" type="image/png" href="{{ @BASEURL }}/ui/images/zotero_196x196x32.png" sizes="196x196"/>
+        <link rel="stylesheet" type="text/css" href="{{ @BASEURL }}/ui/css/zotero-local-database.css">
     </head>
     <body>
 
@@ -25,9 +26,17 @@
         </check>
     </div>
     <div class="right menu">
-        <form class="item" method="GET" action="./">
+        <form class="item" method="GET">
             <div class="ui icon input">
-                <input type="text" name="q" placeholder="Search...">
+                <check if="{{ isset($_GET['q']) }}">
+                    <true>
+                        <input type="text" name="q" value="{{ $_GET['q'] }}" placeholder="Search...">
+                    </true>
+                    <false>
+                        <input type="text" name="q" placeholder="Search...">
+                    </false>
+                </check>
+                
                 <i class="search icon"></i>
             </div>
         </form>

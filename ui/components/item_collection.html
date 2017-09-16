@@ -5,10 +5,11 @@
                 <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
             </div>
             <div class="content">
-                <a class="header">{{ @item.item_title }}</a>
+                <a class="header" 
+                       href="{{ @BASEURL }}/item/{{ @item.item_id }}">{{ @item.item_title | raw }}</a>
                 <div class="meta">
                     <span>
-                        {{ @item.item_creators }} 
+                        {{ @item.item_creators | raw }} 
                         ({{ @item.item_date }})
                         / Last modified: {{ @item.item_modified_date }}
                     </span>

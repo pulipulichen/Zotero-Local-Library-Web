@@ -107,13 +107,11 @@ class ZoteroLocalDatabase {
         echo \Template::instance()->render('components/pagination.html');
     }
     
-    function get_item_collection($f3, $offset = 0, $item_id = NULL) {
-        $page_limit = $f3->get('PAGE_LIMIT');
-        
-        $where_item_id = "";
-        if (is_null($item_id) === FALSE) {
-            $where_item_id = 'AND item_id = ' . $item_id;
-            $offset = 0;
+    function get_item_collection_sql($f3) {
+        $where_search = "";
+        if (isset($_GET["q"])) {
+            $q = $_GET["q"];
+            $where_search = "AND (itemTitle.value LIKE '%" . $q . "%' OR itemCreators.item_creators LIKE '%" . $q . "%' )";
         }
         
         $sql = "SELECT
@@ -148,39 +146,53 @@ and itemTitle.itemID = itemCreators.itemID
 and itemTitle.itemTypeID = 2
 and itemTitle.fieldID = 110
 and itemDate.fieldID = 14
-" . $where_item_id . "
+" . $where_search . "
 ORDER BY
-itemTitle.dateModified DESC
+itemTitle.dateModified DESC";
+        
+        return $sql;
+    }
+    
+    function get_item_collection($f3, $offset = 0, $item_id = NULL) {
+        $page_limit = $f3->get('PAGE_LIMIT');
+        
+        $where_item_id = "";
+        if (is_null($item_id) === FALSE) {
+            $where_item_id = 'WHERE item_id = ' . $item_id;
+            $offset = 0;
+        }
+        
+        $item_collection_sql = $this->get_item_collection_sql($f3);
+        $sql = "SELECT * FROM (" . $item_collection_sql . ") as a
+" . $where_item_id . "
 LIMIT " . $offset . ", " . $page_limit;
         
-        //echo '<textarea>' . $sql . '</textarea>';
+        //echo "<!-- \n\n" . $sql . "\n\n -->";
         
         $rows = $f3->db->exec($sql);
-        /*
-        $items_collection = array();
-        foreach ($rows as $row) {
-            $items_collection[] = $row;
-            
-            $f3->set('item_title', $row['item_title']);
-            $f3->set('item_creators', $row['item_creators']);
-            $f3->set('item_date', $row['item_date']);
-            $f3->set('item_modified_date', $row['item_modified_date']);
-            echo \Template::instance()->render('components/item.html');
+        
+        // 取代搜尋詞彙
+        if (isset($_GET["q"])) {
+            $q = $_GET["q"];
+            for ($i = 0; $i < count($rows); $i++) {
+                $rows[$i]["item_title"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_title"]);
+                $rows[$i]["item_creators"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_creators"]);
+            }
         }
-        */
+        
         return $rows;
     }
     
     function get_items_count($f3) {
-        $rows = $f3->db->exec("select count(attachments_count) as items_count
-from (
-select count(items.itemID) as attachments_count
-from items
-join itemAttachments 
-on items.itemID = itemAttachments.parentItemID 
-and itemAttachments.contentType = 'application/pdf'
-and items.itemTypeID = 2
-group by items.itemID) as a");
+        
+        $item_collection_sql = $this->get_item_collection_sql($f3);
+        $sql = "select count(*) as items_count
+from (" . $item_collection_sql . ") as a";
+        
+        //echo '<!-- \n\n' . $sql . '\n\n -->';
+        
+        $rows = $f3->db->exec($sql);
+        
         return $rows[0]["items_count"];
     }
 }
