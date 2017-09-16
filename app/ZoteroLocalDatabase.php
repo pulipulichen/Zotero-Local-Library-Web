@@ -5,8 +5,8 @@ class ZoteroLocalDatabase {
     }
     
     function item_collection($f3) {
-        $f3->set('page_title', 'Zotero Local Database');
-        echo \Template::instance()->render('layout/header.html');
+        
+        
         $page = $f3->get('PARAMS.page');
         $page_limit = $f3->get('PAGE_LIMIT');
         $items_count = $this->get_items_count($f3);
@@ -17,6 +17,12 @@ class ZoteroLocalDatabase {
         
         $f3->set('item_collection', $this->get_item_collection($f3, $offset));
         
+        $f3->set('page_title', 'Zotero Local Database (page: ' . $page . ')');
+        
+        // -----------------------
+        
+        echo \Template::instance()->render('layout/header.html');
+        
         $this->pagination($f3, $page, $items_count);
         
         echo \Template::instance()->render('components/item_collection.html');
@@ -25,6 +31,24 @@ class ZoteroLocalDatabase {
         
         echo \Template::instance()->render('layout/footer.html');
     }
+    
+    function item($f3) {
+        $item_id = intval($f3->get("PARAMS.item_id"));
+        //echo $item_id;
+        $item_collection = $this->get_item_collection($f3, 0, $item_id);
+        $f3->set('item_collection', $item_collection);
+        
+        $f3->set('page_title', $item_collection[0]['item_title'] . ' - Zotero Local Database');
+        $f3->set('page_header', $item_collection[0]['item_title']);
+        
+        // ----------------------
+        
+        echo \Template::instance()->render('layout/header.html');
+        echo \Template::instance()->render('components/item.html');
+        echo \Template::instance()->render('layout/footer.html');
+    }
+
+    // ----------------------------------------
     
     function pagination($f3, $current_page, $items_count) {
         

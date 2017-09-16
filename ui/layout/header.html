@@ -10,7 +10,29 @@
     </head>
     <body>
 
-<h1 class="ui header">{{ @page_title }}</h1>
-        
-<!-- [header] -->
+<div class="ui top fixed menu">
+    <a class="item" href="{{ @BASEURL }}">
+        <img src="{{ @BASEURL }}/ui/images/zotero_36x36x32.png" />
+    </a>
+    <div class="item active">
+        <check if="{{ isset($page_header) }}">
+            <true>
+                {{ @page_header }}
+            </true>
+            <false>
+                {{ @page_title }}
+            </false>
+        </check>
+    </div>
+    <div class="right menu">
+        <form class="item" method="GET" action="./">
+            <div class="ui icon input">
+                <input type="text" name="q" placeholder="Search...">
+                <i class="search icon"></i>
+            </div>
+        </form>
+    </div>
+</div>
 
+<div style="margin-top: 80px">
+<!-- [header] -->
