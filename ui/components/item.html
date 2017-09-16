@@ -17,3 +17,19 @@
         </div>
     </repeat>
 </div>
+
+<div class="ui relaxed divided link selection list">
+    <repeat group="{{ @attachment_collection }}" value="{{ @attachment }}">
+        <a class="item" target="_blank"
+               href="https://drive.google.com/drive/u/0/search?q=type:folder%20{{ @attachment.attachment_key }}">
+            <i class="file pdf outline icon"></i>
+            <div class="content">
+                <div class="header">{{ @attachment.attachment_title }}</div>
+                <div class="description">
+                    {{ @attachment.attachment_date_modified }}
+                    
+                </div>
+            </div>
+        </a>
+    </repeat>
+</div>

@@ -32,11 +32,26 @@ class ZoteroLocalDatabase {
         echo \Template::instance()->render('layout/footer.html');
     }
     
+    // ----------------------------
+    
     function item($f3) {
         $item_id = intval($f3->get("PARAMS.item_id"));
         //echo $item_id;
         $item_collection = $this->get_item_collection($f3, 0, $item_id);
         $f3->set('item_collection', $item_collection);
+        
+        $sql = "select 
+replace(itemAttachments.path, 'storage:', '') as attachment_title, 
+items.key as attachment_key, 
+items.dateModified as attachment_date_modified
+from itemAttachments
+left join items using (itemID)
+where
+itemAttachments.parentItemID = " . $item_id . " 
+and itemAttachments.contentType = 'application/pdf'
+order by attachment_title + 0";
+        $rows = $f3->db->exec($sql);
+        $f3->set('attachment_collection', $rows);
         
         $f3->set('page_title', $item_collection[0]['item_title'] . ' - Zotero Local Database');
         $f3->set('page_header', $item_collection[0]['item_title']);
