@@ -1,6 +1,9 @@
 # Zotero-Local-Library-Web
 A PHP website to search Zotero's local database (zotero.sqlite).
 
+# TODO list
+- 總之，先把書本的 [標題] - [作者] (年代) 列出來吧
+
 # Development tips
 - Semantic UI: https://semantic-ui.com/usage/layout.html
 - Fat-Free Framework: https://fatfreeframework.com/3.6/api-reference

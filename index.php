@@ -9,7 +9,12 @@ if ((float)PCRE_VERSION<7.9) {
 }
 
 // Load configuration
-$f3->config('config.ini');
+if (file_exists('config.ini')) {
+    $f3->config('config.ini');
+}
+else {
+    $f3->config('config_sample.ini');
+}
 
 /*
 $f3->route('GET /',
