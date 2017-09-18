@@ -1,4 +1,5 @@
 SELECT
+itemTitle.itemID AS item_id, 
 itemTitle.value AS item_title, 
 itemCreators.item_creators AS item_creators,
 substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
@@ -72,6 +73,7 @@ left join
 WHERE 
 itemTitle.itemID = itemDate.itemID
 and itemTitle.itemID = itemCreators.itemID
+and itemTitle.itemTypeID = 2
 and itemTitle.fieldID = 110
 and itemDate.fieldID = 14
 and itemTitle.itemID = 17392

@@ -40,6 +40,7 @@ class ZoteroLocalDatabase {
         $item_collection = $this->get_item_collection($f3, 0, $item_id);
         $f3->set('item_collection', $item_collection);
         
+        // 查詢item的attachments.sql
         $sql = "select 
 replace(itemAttachments.path, 'storage:', '') as attachment_title, 
 items.key as attachment_key, 
@@ -130,20 +131,34 @@ order by attachment_title + 0";
         }
         
         $sql = "SELECT
-itemTitle.itemID as item_id,
+itemTitle.itemID AS item_id, 
 itemTitle.value AS item_title, 
 itemCreators.item_creators AS item_creators,
 substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
-itemTitle.dateModified AS item_modified_date
+itemTitle.dateModified AS item_modified_date,
+itemCover.item_cover_path AS item_cover_path,
+ifnull(item_attachment_count, 0) AS item_attachment_count,
+itemLink.value as item_link
 FROM
+
 (items
 left join itemData using(itemID) 
 left join itemDataValues using(valueID)
-left join fields using(fieldID)) as itemTitle,
+left join fields using(fieldID)) as itemTitle
+
+join 
+(select 
+    count(itemID) as item_attachment_count, 
+    itemAttachments.parentItemID
+    from itemAttachments
+    where contentType = 'application/pdf'
+    group by itemAttachments.parentItemID) as itemAttachmentCount on itemCreators.itemID = itemAttachmentCount.parentItemID,
+
 (items
 left join itemData using(itemID) 
 left join itemDataValues using(valueID)
 left join fields using(fieldID)) as itemDate,
+
 (select 
     items.itemID,
     group_concat(creators.lastName, ', ') as item_creators
@@ -154,6 +169,38 @@ left join fields using(fieldID)) as itemDate,
     where creatorTypeID = 1
     group by itemID
     order by orderIndex) as itemCreators
+
+left join 
+(select 
+    replace(itemAttachments.path, 'storage:', '" . $f3->get("ZOTERO_PATH") . "' || '/storage/' || items.key || '/') as item_cover_path, 
+    items.key, 
+    items.dateModified,
+    itemAttachments.parentItemID
+    from itemAttachments
+    left join items using (itemID)
+    where
+    (contentType = 'image/png' or contentType = 'image/gif' or contentType = 'image/jpeg')
+    group by itemAttachments.parentItemID
+    order by dateModified DESC) as itemCover on itemCreators.itemID = itemCover.parentItemID
+
+left join
+(select 
+    itemAttachments.parentItemID,
+    itemLink.value
+    from 
+    itemAttachments 
+        join (
+            select items.itemID, value, items.dateModified from items join itemData using (itemID) 
+                join itemDataValues on itemDataValues.valueID = itemData.valueID and itemData.fieldID = 110 
+            ) as itemTitle using (itemID)
+        join (
+            select items.itemID, value from items join itemData using (itemID) 
+                join itemDataValues on itemDataValues.valueID = itemData.valueID and itemData.fieldID = 1 
+            ) as itemLink using (itemID)
+    where 
+    linkMode = 3
+    group by parentItemID
+    order by dateModified DESC) as itemLink on itemLink.parentItemID = itemCreators.itemID
 
 WHERE
 itemTitle.itemID = itemDate.itemID
@@ -186,12 +233,36 @@ LIMIT " . $offset . ", " . $page_limit;
         
         $rows = $f3->db->exec($sql);
         
-        // 取代搜尋詞彙
-        if (isset($_GET["q"])) {
-            $q = $_GET["q"];
-            for ($i = 0; $i < count($rows); $i++) {
+        for ($i = 0; $i < count($rows); $i++) {
+            // 取代搜尋詞彙
+            if (isset($_GET["q"])) {
+                $q = $_GET["q"];
                 $rows[$i]["item_title"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_title"]);
                 $rows[$i]["item_creators"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_creators"]);
+            }
+            
+            if (is_null($rows[$i]["item_cover_path"]) === FALSE) {
+                // https://fatfreeframework.com/3.6/image
+                $cover_path = mb_convert_encoding($rows[$i]["item_cover_path"], 'big5');
+                $width = 50;
+                $type = 'gif';
+                
+                list($width_orig, $height_orig) = getimagesize($cover_path);
+                $aspectRatio = $height_orig / $width_orig;
+                $height = intval($aspectRatio * $width);
+                
+                $image_p = imagecreatetruecolor($width, $height);
+                $image = imagecreatefromstring(file_get_contents($cover_path));
+                imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig,$height_orig);
+                
+                ob_start(); // Let's start output buffering.
+                    imagegif($image_p); //This will normally output the image, but because of ob_start(), it won't.
+                    $contents = ob_get_contents(); //Instead, output above is saved to $contents
+                ob_end_clean(); //End the output buffer.
+                
+                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($contents);
+                
+                $rows[$i]["item_cover_base64"] = $base64;
             }
         }
         

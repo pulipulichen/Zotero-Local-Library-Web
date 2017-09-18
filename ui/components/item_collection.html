@@ -4,7 +4,14 @@
             
             
             <div class="image" style="width: 50px;">
-                <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
+                <check if="{{ is_null(@item.item_cover_path) }}">
+                    <true>
+                        <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
+                    </true>
+                    <false>
+                        <img src="{{ @item.item_cover_base64 }}">
+                    </false>
+                </check>
             </div>
             <div class="content" style="width: 100%;">
                 <a class="header" 
@@ -30,7 +37,7 @@
             <div class="extra" style="float:right;">
                 <a class="ui right floated primary button"
                    href="{{ @BASEURL }}/item/{{ @item.item_id }}">
-                    FILES
+                    FILES ({{ @item.item_attachment_count }})
                     <i class="right chevron icon"></i>
                 </a>
             </div>

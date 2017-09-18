@@ -2,7 +2,14 @@
     <repeat group="{{ @item_collection }}" value="{{ @item }}">
         <div class="item">
             <div class="image" style="width: 50px;">
-                <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
+                <check if="{{ is_null(@item.item_cover_path) }}">
+                    <true>
+                        <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
+                    </true>
+                    <false>
+                        <img src="{{ @item.item_cover_base64 }}">
+                    </false>
+                </check>
             </div>
             <div class="content" style="width: 100%">
                 <div class="header">{{ @item.item_title }}</div>
@@ -11,18 +18,25 @@
                         {{ @item.item_creators }} 
                         ({{ @item.item_date }})
                         / Last modified: {{ @item.item_modified_date }}
+                        / Files: {{ @item.item_attachment_count }}
                     </span>
                 </div>
             </div>
-            <!--
+            
             <div class="extra" style="float:right;">
+                <!--
                 <div class="ui right floated primary button"
                    onclick="item_open_all()">
                     OPEN ALL
                     <i class="right chevron icon"></i>
                 </div>
+                -->
+                <div class="ui right floated primary button"
+                   onclick="item_open_all()">
+                    Google Drive
+                    <i class="right chevron icon"></i>
+                </div>
             </div>
-            -->
         </div>
     </repeat>
 </div>
