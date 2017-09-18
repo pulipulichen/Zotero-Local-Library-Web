@@ -3,8 +3,8 @@ itemTitle.value AS item_title,
 itemCreators.item_creators AS item_creators,
 substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
 itemTitle.dateModified AS item_modified_date,
-itemCover.item_cover_path AS item_cover_path
-
+itemCover.item_cover_path AS item_cover_path,
+ifnull(item_attachment_count, 0) AS item_attachment_count
 FROM
 
 (items
@@ -41,11 +41,19 @@ left join
     group by itemAttachments.parentItemID
     order by dateModified DESC) as itemCover on itemCreators.itemID = itemCover.parentItemID
 
+left join 
+(select 
+    count(itemID) as item_attachment_count, 
+    itemAttachments.parentItemID
+    from itemAttachments
+    where contentType = 'application/pdf'
+    group by itemAttachments.parentItemID) as itemAttachmentCount on itemCreators.itemID = itemAttachmentCount.parentItemID
+
 WHERE 
 itemTitle.itemID = itemDate.itemID
 and itemTitle.itemID = itemCreators.itemID
 and itemTitle.fieldID = 110
 and itemDate.fieldID = 14
-and itemTitle.itemID = 689
+and itemTitle.itemID = 1
 ORDER BY
 itemTitle.dateModified DESC
