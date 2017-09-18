@@ -31,11 +31,12 @@
                     <i class="right chevron icon"></i>
                 </div>
                 -->
-                <div class="ui right floated primary button"
-                   onclick="item_open_all()">
-                    Google Drive
-                    <i class="right chevron icon"></i>
-                </div>
+                <check if="{{ isset(@item.item_link) }}">
+                    <a class="ui right floated primary button" href="{{ @item.item_link }}" target="_blank">
+                        Google Drive
+                        <i class="right chevron icon"></i>
+                    </a>
+                </check>
             </div>
         </div>
     </repeat>

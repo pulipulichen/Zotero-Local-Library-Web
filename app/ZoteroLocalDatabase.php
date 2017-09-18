@@ -57,6 +57,10 @@ order by attachment_title + 0";
         $f3->set('page_title', $item_collection[0]['item_title'] . ' - Zotero Local Database');
         $f3->set('page_header', $item_collection[0]['item_title']);
         
+        if (isset($item_collection[0]['item_link'])) {
+            $f3->set('folder_link', $item_collection[0]['item_link']);
+        }
+        
         // ----------------------
         
         echo \Template::instance()->render('layout/header.html');
@@ -229,7 +233,7 @@ itemTitle.dateModified DESC";
 " . $where_item_id . "
 LIMIT " . $offset . ", " . $page_limit;
         
-        //echo "<!-- \n\n" . $sql . "\n\n -->";
+        echo "<!-- \n\n" . $sql . "\n\n -->";
         
         $rows = $f3->db->exec($sql);
         
