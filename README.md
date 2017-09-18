@@ -2,8 +2,6 @@
 A PHP website to search Zotero's local database (zotero.sqlite).
 
 # TODO list
-- 沒有檔案的，就不列出來
-- 要把書本的Google Drive連結加上去 (Google Drive)
 - ToRead, ReadSkip, ReadFinish標籤的變化
 - 搜尋要能搜尋note裡面的文字
 - [book] [journal & conference]
