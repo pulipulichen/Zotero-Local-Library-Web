@@ -18,7 +18,7 @@ else {
 
 // Database
 global $db;
-$zotero_sqlite = $f3->get('ZOTERO_SQLITE_PATH');
+$zotero_sqlite = $f3->get('ZOTERO_SQLITE_PATH') . '\zotero.sqlite';
 $db = new \DB\SQL('sqlite:' . $zotero_sqlite);
 $f3->db = $db;
 
