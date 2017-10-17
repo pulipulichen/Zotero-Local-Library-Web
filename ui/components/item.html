@@ -32,10 +32,17 @@
                 </div>
                 -->
                 <check if="{{ isset(@item.item_link) }}">
-                    <a class="ui right floated primary button" href="{{ @item.item_link }}" target="_blank">
-                        Google Drive
-                        <i class="right chevron icon"></i>
-                    </a>
+                    <true>
+                        <a class="ui right floated primary button" href="{{ @item.item_link }}" target="_blank">
+                            Google Drive
+                            <i class="right chevron icon"></i>
+                        </a>
+                    </true>
+                    <false>
+                        <a class="ui right floated button disabled">
+                            Please add "Google Drive" link to item
+                        </a>
+                    </false>
                 </check>
             </div>
         </div>
