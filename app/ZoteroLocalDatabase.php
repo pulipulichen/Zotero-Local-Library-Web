@@ -26,7 +26,7 @@ class ZoteroLocalDatabase {
         if (is_numeric($f3->get('PARAMS.tag'))) {
             $page = $f3->get('PARAMS.tag');
         }
-        else {
+        else if ($f3->get('PARAMS.tag') !== "") {
             $this->tag = $f3->get('PARAMS.tag');
         }
         if (is_numeric($f3->get('PARAMS.page'))) {
@@ -35,7 +35,7 @@ class ZoteroLocalDatabase {
         
         if (is_null($this->tag)) {
             $config_tags = $f3->get('TAGS');
-            if (count($config_tags) > 0) {
+            if (count($config_tags) > 0 && strtolower($config_tags[0]) !== "null") {
                 $this->tag = trim($config_tags[0]);
             }
         }
@@ -49,7 +49,11 @@ class ZoteroLocalDatabase {
         
         $f3->set('item_collection', $this->get_item_collection($f3, $offset));
         
-        $f3->set('page_title', 'Zotero Local Database (page: ' . $page . ')');
+        $page_title = "Zotero Local Database";
+        if (is_string($this->tag)) {
+            $page_title = $this->tag;
+        }
+        $f3->set('page_title', $page_title . ' (p. ' . $page . ')');
         
         // -----------------------
         
@@ -173,7 +177,7 @@ order by attachment_title + 0";
         }
         
         $tag_join = "";
-        if (is_null($this->tag) === FALSE) {
+        if (is_null($this->tag) === FALSE && $this->tag !== "") {
             $tag_join = "join itemTags using(itemID)
 join tags on tags.tagID = itemTags.tagID and tags.name = '" . $this->tag . "'";
         }
