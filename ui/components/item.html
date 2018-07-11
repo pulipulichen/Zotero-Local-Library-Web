@@ -1,4 +1,4 @@
-<div class="ui divided items">
+<div class="ui divided unstackable items">
     <repeat group="{{ @item_collection }}" value="{{ @item }}">
         <div class="item">
             <div class="image" style="width: 50px;">
@@ -23,6 +23,8 @@
                 </div>
             </div>
             
+            <check if="{{ isset(@item.item_link) }}">
+                    <true>
             <div class="extra" style="float:right;">
                 <!--
                 <div class="ui right floated primary button"
@@ -31,20 +33,15 @@
                     <i class="right chevron icon"></i>
                 </div>
                 -->
-                <check if="{{ isset(@item.item_link) }}">
-                    <true>
-                        <a class="ui right floated primary button" href="{{ @item.item_link }}" target="_blank">
+                
+                        <a class="ui right floated primary button" href={{ @item.item_link }}" target="_blank">
                             Google Drive
                             <i class="right chevron icon"></i>
                         </a>
-                    </true>
-                    <false>
-                        <a class="ui right floated button disabled">
-                            Please add "Google Drive" link to item
-                        </a>
-                    </false>
-                </check>
             </div>
+                    
+                    </true>
+                </check>
         </div>
     </repeat>
 </div>
@@ -52,7 +49,7 @@
 <div class="ui relaxed divided link selection list attachments">
     <repeat group="{{ @attachment_collection }}" value="{{ @attachment }}">
         <a class="item" target="_blank"
-               href="https://drive.google.com/drive/u/0/search?q={{ @attachment.attachment_key }}%20type:folder">
+               href="http://gdrive.search/{{ @attachment.attachment_key }}"> 
             <i class="file pdf outline icon"></i>
             <div class="content">
                 <div class="header">{{ @attachment.attachment_title }}</div>
@@ -61,5 +58,17 @@
                 </div>
             </div>
         </a>
+        <!--
+        <a class="item" target="_blank"
+               href="https://drive.google.com/drive/u/0/search?q={{ @attachment.attachment_key }}%20type:folder"> 
+            <i class="file pdf outline icon"></i>
+            <div class="content">
+                <div class="header">{{ @attachment.attachment_title }}</div>
+                <div class="description">
+                    {{ @attachment.attachment_date_modified }}
+                </div>
+            </div>
+        </a>
+        -->
     </repeat>
 </div>
