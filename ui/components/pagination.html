@@ -4,10 +4,10 @@
         <repeat group="{{ @pagination_first }}" value="{{ @p }}">
             <check if="{{ isset($_GET['q']) }}">
                 <true>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
                 </true>
                 <false>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}">{{ @p }}</a>
                 </false>
             </check>
         </repeat>
@@ -23,10 +23,10 @@
         <repeat group="{{ @pagination_before }}" value="{{ @p }}">
             <check if="{{ isset($_GET['q']) }}">
                 <true>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
                 </true>
                 <false>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}">{{ @p }}</a>
                 </false>
             </check>
         </repeat>
@@ -35,10 +35,10 @@
         <repeat group="{{ @pagination_current }}" value="{{ @p }}">
             <check if="{{ isset($_GET['q']) }}">
                 <true>
-                    <a class="item active" href="{{ @BASEURL }}/item_collection/{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
+                    <a class="item active" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
                 </true>
                 <false>
-                    <a class="item active" href="{{ @BASEURL }}/item_collection/{{@p}}">{{ @p }}</a>
+                    <a class="item active" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}">{{ @p }}</a>
                 </false>
             </check>
         </repeat>
@@ -47,10 +47,10 @@
         <repeat group="{{ @$pagination_after }}" value="{{ @p }}">
             <check if="{{ isset($_GET['q']) }}">
                 <true>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
                 </true>
                 <false>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}">{{ @p }}</a>
                 </false>
             </check>
         </repeat>
@@ -66,10 +66,10 @@
         <repeat group="{{ @pagination_last }}" value="{{ @p }}">
             <check if="{{ isset($_GET['q']) }}">
                 <true>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}?q={{ $_GET['q'] }}">{{ @p }}</a>
                 </true>
                 <false>
-                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@p}}">{{ @p }}</a>
+                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}{{@p}}">{{ @p }}</a>
                 </false>
             </check>
         </repeat>

@@ -4,10 +4,42 @@ class ZoteroLocalDatabase {
         header('Location: ' . $f3->get("BASEURL") . '/item_collection');
     }
     
+    private $q = NULL;
+    private $tag = NULL;        
+        
     function item_collection($f3) {
         
+        if (isset($_GET["q"])) {
+            $this->q = $_GET["q"];
+        }
         
-        $page = $f3->get('PARAMS.page');
+        /*
+        if (isset($_GET["tag"])) {
+            $this->tag = $_GET["tag"];
+        }
+        else {
+            $this->tag = "ToReadZH";
+        }
+         */
+        
+        $page = NULL;
+        if (is_numeric($f3->get('PARAMS.tag'))) {
+            $page = $f3->get('PARAMS.tag');
+        }
+        else {
+            $this->tag = $f3->get('PARAMS.tag');
+        }
+        if (is_numeric($f3->get('PARAMS.page'))) {
+            $page = $f3->get('PARAMS.page');
+        }
+        
+        if (is_null($this->tag)) {
+            $config_tags = $f3->get('TAGS');
+            if (count($config_tags) > 0) {
+                $this->tag = trim($config_tags[0]);
+            }
+        }
+        
         $page_limit = $f3->get('PAGE_LIMIT');
         $items_count = $this->get_items_count($f3);
         if (is_null($page) || $page > ceil($items_count / $page_limit)) {
@@ -124,15 +156,28 @@ order by attachment_title + 0";
         }
         $f3->set('pagination_last', $pagination_last);
         
+        if (is_null($this->tag) === FALSE) {
+            $f3->set("tag", $this->tag . "/");
+        } 
+        else {
+            $f3->set("tag", "");
+        }
+        
         echo \Template::instance()->render('components/pagination.html');
     }
     
     function get_item_collection_sql($f3) {
         $where_search = "";
-        if (isset($_GET["q"])) {
-            $q = $_GET["q"];
-            $where_search = "AND (itemTitle.value LIKE '%" . $q . "%' OR itemCreators.item_creators LIKE '%" . $q . "%' )";
+        if (is_null($this->q) === FALSE) {
+            $where_search = "AND (itemTitle.value LIKE '%" . $this->q . "%' OR itemCreators.item_creators LIKE '%" . $this->q . "%' )";
         }
+        
+        $tag_join = "";
+        if (is_null($this->tag) === FALSE) {
+            $tag_join = "join itemTags using(itemID)
+join tags on tags.tagID = itemTags.tagID and tags.name = '" . $this->tag . "'";
+        }
+        echo "<!-- \n\n" . $this->tag . "\n\n -->";
         
         $sql = "SELECT
 itemTitle.itemID AS item_id, 
@@ -146,6 +191,7 @@ itemLink.value as item_link
 FROM
 
 (items
+" . $tag_join . "
 left join itemData using(itemID) 
 left join itemDataValues using(valueID)
 left join fields using(fieldID)) as itemTitle
@@ -239,8 +285,8 @@ LIMIT " . $offset . ", " . $page_limit;
         
         for ($i = 0; $i < count($rows); $i++) {
             // 取代搜尋詞彙
-            if (isset($_GET["q"])) {
-                $q = $_GET["q"];
+            if (is_null($this->q)) {
+                $q = $this->q;
                 $rows[$i]["item_title"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_title"]);
                 $rows[$i]["item_creators"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_creators"]);
             }
@@ -279,7 +325,7 @@ LIMIT " . $offset . ", " . $page_limit;
         $sql = "select count(*) as items_count
 from (" . $item_collection_sql . ") as a";
         
-        //echo '<!-- \n\n' . $sql . '\n\n -->';
+        echo "<!-- \n\n" . $sql . "\n\n -->";
         
         $rows = $f3->db->exec($sql);
         
