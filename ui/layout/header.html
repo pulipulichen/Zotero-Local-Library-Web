@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{{ @page_title }}</title>
+        <title>{{ @page_title }} | Zotero</title>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <script src="{{ @BASEURL }}/ui/js/jquery-3.2.1.min.js"></script>
@@ -27,16 +27,35 @@
             </a>
         </false>
     </check>
-    <div class="item active">
-        <check if="{{ isset($page_header) }}">
-            <true>
+    <check if="{{ isset($page_header) }}">
+        <true>
+            <div class="item active">
                 {{ @page_header }}
-            </true>
-            <false>
-                {{ @page_title }}
-            </false>
-        </check>
-    </div>
+            </div>
+        </true>
+        <false>
+            <div class="ui pointing dropdown link item">
+                    <div class="text">{{ @page_title }}</div>
+                    <i class="dropdown icon"></i>
+                    <div class="menu">
+                        <repeat group="{{ @page_tags }}" value="{{ @tag }}">
+                            <check if="{{ @tag }} == 'null'">
+                                <true>
+                                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}">All Items</a>
+                                </true>
+                                <false>
+                                    <a class="item" href="{{ @BASEURL }}/item_collection/{{@tag}}">{{ @tag }}</a>
+                                </false>
+                            </check>
+                            
+                        </repeat>
+                    </div>
+            </div>
+            <div class="item active">
+                p. {{ @page_number }}
+            </div>
+        </false>
+    </check>
     <div class="right menu">
         <check if="{{ isset(@folder_link) }}">
             <true>

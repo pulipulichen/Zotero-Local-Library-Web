@@ -49,11 +49,23 @@ class ZoteroLocalDatabase {
         
         $f3->set('item_collection', $this->get_item_collection($f3, $offset));
         
-        $page_title = "Zotero Local Database";
+        $page_title = "All Items";
         if (is_string($this->tag)) {
             $page_title = $this->tag;
         }
-        $f3->set('page_title', $page_title . ' (p. ' . $page . ')');
+        if (strtolower($page_title) === "null") {
+            $page_title = "All Items";
+        }
+        $f3->set('page_title', $page_title);
+        $f3->set('page_number', $page);
+        
+        $tags_list = $f3->get('TAGS');
+        foreach ($tags_list as $key => $value) {
+            if (is_null($value) || strtolower($value) === "null") {
+                $tags_list[$key] = "null";
+            }
+        }
+        $f3->set('page_tags', $tags_list);
         
         // -----------------------
         
@@ -177,7 +189,7 @@ order by attachment_title + 0";
         }
         
         $tag_join = "";
-        if (is_null($this->tag) === FALSE && $this->tag !== "") {
+        if (is_null($this->tag) === FALSE && $this->tag !== "" && strtolower($this->tag) !== "null") {
             $tag_join = "join itemTags using(itemID)
 join tags on tags.tagID = itemTags.tagID and tags.name = '" . $this->tag . "'";
         }

@@ -8,6 +8,8 @@ $(function () {
     $('.attachments.list a.item').click(function () {
         $(this).addClass("clicked");
     });
+    
+    $('.ui.dropdown').dropdown();
 });
 
 item_open_all = function () {
