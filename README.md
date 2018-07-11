@@ -2,6 +2,7 @@
 A PHP website to search Zotero's local database (zotero.sqlite).
 
 # TODO list
+- 密碼功能
 - ToRead, ReadSkip, ReadFinish標籤的變化
 - 搜尋要能搜尋note裡面的文字
 - [book] [journal & conference]
