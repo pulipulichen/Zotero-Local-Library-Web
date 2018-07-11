@@ -193,7 +193,10 @@ order by attachment_title + 0";
             $tag_join = "join itemTags using(itemID)
 join tags on tags.tagID = itemTags.tagID and tags.name = '" . $this->tag . "'";
         }
-        echo "<!-- \n\n" . $this->tag . "\n\n -->";
+        //echo "<!-- \n\n" . $this->tag . "\n\n -->";
+        
+        $limit_boot_type = "";
+        //$limit_boot_type = "and itemTitle.itemTypeID = 2";
         
         $sql = "SELECT
 itemTitle.itemID AS item_id, 
@@ -271,7 +274,7 @@ left join
 WHERE
 itemTitle.itemID = itemDate.itemID
 and itemTitle.itemID = itemCreators.itemID
-and itemTitle.itemTypeID = 2
+" . $limit_boot_type . "
 and itemTitle.fieldID = 110
 and itemDate.fieldID = 14
 " . $where_search . "
