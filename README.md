@@ -21,3 +21,5 @@ A PHP website to search Zotero's local database (zotero.sqlite).
 
 # Google Drive tips
 - Create file's symbolic link: `Shift + Z` ([Google 雲端硬碟整理檔案密技！複製檔案資料夾「分身」實測](http://www.playpcesor.com/2017/08/google-drive-copy.html))
+
+https://build.phonegap.com/apps/3231928/builds
