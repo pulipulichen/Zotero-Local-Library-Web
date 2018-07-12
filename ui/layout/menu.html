@@ -44,6 +44,7 @@
         </false>
     </check>
     <div class="right menu">
+        <!--
         <check if="{{ isset(@folder_link) }}">
             <true>
                 <a class="item" href="{{ @folder_link }}" target="google_drive_reading">
@@ -56,6 +57,10 @@
                 </a>
             </false>
         </check>
+        -->
+        <a class="item" href="{{ @BASEURL }}/start_zotero">
+            <i class="play circle outline icon"></i>
+        </a>
             
         <form class="item" method="GET">
             <div class="ui icon input">

@@ -10,13 +10,17 @@ class ZoteroLocalDatabase {
     
     function check_sqlite_lock($f3) {
         if (is_object($f3->db) === FALSE) {
-            $f3->set('page_title', "Error");
-            echo \Template::instance()->render('layout/header.html');
-            echo \Template::instance()->render('sqlite_locked_error_menu.html');
-            echo \Template::instance()->render('sqlite_locked_error.html');
-            echo \Template::instance()->render('layout/footer.html');
-            exit;
+            $this->locked_zotero($f3);
         }
+    }
+    
+    function locked_zotero($f3) {
+        $f3->set('page_title', "Error");
+        echo \Template::instance()->render('layout/header.html');
+        echo \Template::instance()->render('sqlite_locked_error_menu.html');
+        echo \Template::instance()->render('sqlite_locked_error.html');
+        echo \Template::instance()->render('layout/footer.html');
+        exit;
     }
     
     function close_zotero($f3) {
@@ -25,13 +29,22 @@ class ZoteroLocalDatabase {
         $autoit_script = substr($script, 0, strrpos($script, "app")) . "autoit\\close-zotero.exe";
         //shell_exec('taskkill /F /IM "zotero.exe"');
         shell_exec($autoit_script);
-        $this->index($f3);
+        sleep(3);
+        header('Location: ' . $f3->get("BASEURL"));
     }
     
     function start_zotero($f3) {
+        if (is_object($f3->db) === FALSE) {
+            $f3->db = null;
+        }
+        
         $zotero_path = $f3->get('ZOTERO_PATH');
-        shell_exec($zotero_path);
-        $this->index($f3);
+        $autoit_script = substr(__DIR__, 0, strrpos(__DIR__, "app")) . "autoit\\start-zotero.exe";
+        //echo $autoit_script . '"' . $zotero_path . '"';
+        shell_exec($autoit_script . ' "' . $zotero_path . '"');
+        //pclose(popen('start /B cmd /C "' . $zotero_path . ' >NUL 2>NUL"', 'r'));
+        
+        $this->locked_zotero($f3);
     }
         
     function item_collection($f3) {
