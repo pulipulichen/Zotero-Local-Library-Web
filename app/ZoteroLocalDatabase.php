@@ -1,13 +1,35 @@
 <?php
 class ZoteroLocalDatabase {
     function index($f3) {
+        $this->check_sqlite_lock($f3);
         header('Location: ' . $f3->get("BASEURL") . '/item_collection');
     }
     
     private $q = NULL;
-    private $tag = NULL;        
+    private $tag = NULL;
+    
+    function check_sqlite_lock($f3) {
+        if (is_object($f3->db) === FALSE) {
+            $f3->set('page_title', "Error");
+            echo \Template::instance()->render('layout/header.html');
+            echo \Template::instance()->render('sqlite_locked_error_menu.html');
+            echo \Template::instance()->render('sqlite_locked_error.html');
+            echo \Template::instance()->render('layout/footer.html');
+            exit;
+        }
+    }
+    
+    function close_zotero($f3) {
+        // D:\xampp\htdocs\public\Zotero-Local-Library-Web\app\ZoteroLocalDatabase.php
+        $script = __DIR__;
+        $autoit_script = substr($script, 0, strrpos($script, "app")) . "autoit\\close-zotero.exe";
+        //shell_exec('taskkill /F /IM "zotero.exe"');
+        shell_exec($autoit_script);
+        header('Location: ' . $f3->get("BASEURL") . '/item_collection');
+    }
         
     function item_collection($f3) {
+        $this->check_sqlite_lock($f3);
         
         if (isset($_GET["q"])) {
             $this->q = $_GET["q"];
@@ -70,6 +92,7 @@ class ZoteroLocalDatabase {
         // -----------------------
         
         echo \Template::instance()->render('layout/header.html');
+        echo \Template::instance()->render('layout/menu.html');
         
         $this->pagination($f3, $page, $items_count);
         
@@ -83,6 +106,8 @@ class ZoteroLocalDatabase {
     // ----------------------------
     
     function item($f3) {
+        $this->check_sqlite_lock($f3);
+        
         $item_id = intval($f3->get("PARAMS.item_id"));
         //echo $item_id;
         $item_collection = $this->get_item_collection($f3, 0, $item_id);
@@ -112,6 +137,7 @@ order by attachment_title + 0";
         // ----------------------
         
         echo \Template::instance()->render('layout/header.html');
+        echo \Template::instance()->render('layout/menu.html');
         echo \Template::instance()->render('components/item.html');
         echo \Template::instance()->render('layout/footer.html');
     }
