@@ -11,7 +11,7 @@
     background-color: #e6e6e6;
 }
 
-@media only screen and (max-width: 767px) {
+@media (max-width: 767px) {
     .ui.unstackable.items>.item>.image, .ui.unstackable.items>.item>.image>img {
         width: 50px!important;
     }
@@ -24,5 +24,11 @@
     .ui.items>.item .extra a {
         width: auto;
         width: 81px;
+    }
+    .start-zotero {
+        display: none !important;
+    }
+    .ui.icon.input.search-input {
+        width: 100px !important;
     }
 }

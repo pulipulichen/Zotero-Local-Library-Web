@@ -53,7 +53,7 @@ class ZoteroLocalDatabase {
         //echo $autoit_script . '"' . $zotero_path . '"';
         shell_exec($autoit_script . ' "' . $zotero_path . '"');
         //pclose(popen('start /B cmd /C "' . $zotero_path . ' >NUL 2>NUL"', 'r'));
-        sleep(30);
+        sleep(10);
         $this->locked_zotero($f3);
     }
         

@@ -58,12 +58,12 @@
             </false>
         </check>
         -->
-        <a class="item" href="{{ @BASEURL }}/start_zotero">
+        <a class="item start-zotero" href="{{ @BASEURL }}/start_zotero">
             <i class="play circle outline icon"></i>
         </a>
             
         <form class="item" method="GET">
-            <div class="ui icon input">
+            <div class="ui icon input search-input">
                 <check if="{{ isset($_GET['q']) }}">
                     <true>
                         <input type="text" name="q" value="{{ $_GET['q'] }}" placeholder="Search...">
