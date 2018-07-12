@@ -16,6 +16,9 @@ else {
     $f3->config('config_sample.ini');
 }
 
+$cache = \Cache::instance();
+$cache->load("folder:tmp/cache/");
+
 // Database
 global $db;
 $sqlite_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite';
