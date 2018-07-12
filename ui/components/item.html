@@ -48,8 +48,10 @@
 
 <div class="ui relaxed divided link selection list attachments">
     <repeat group="{{ @attachment_collection }}" value="{{ @attachment }}">
+        <!-- <a class="item" target="_blank"
+               href="http://pgb-share-to-search-google-drive.pulipuli.info/{{ @attachment.attachment_key }}"> -->
         <a class="item" target="_blank"
-               href="http://pgb-share-to-search-google-drive.pulipuli.info/{{ @attachment.attachment_key }}"> 
+               href="http://gdrive.search/{{ @attachment.attachment_key }}">
             <i class="file pdf outline icon"></i>
             <div class="content">
                 <div class="header">{{ @attachment.attachment_title }}</div>

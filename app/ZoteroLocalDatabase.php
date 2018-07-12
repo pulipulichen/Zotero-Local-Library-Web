@@ -1,22 +1,24 @@
 <?php
+
 class ZoteroLocalDatabase {
+
     function index($f3) {
         $this->check_sqlite_lock($f3);
         header('Location: ' . $f3->get("BASEURL") . '/item_collection');
     }
-    
+
     private $q = NULL;
     private $tag = NULL;
-    
+
     function check_sqlite_lock($f3) {
         if (is_object($f3->db) === FALSE) {
-            $url =  "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+            $url = "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
             //$_SESSION["last_url"] = $url;
             setcookie("last_url", $url);
             $this->locked_zotero($f3);
         }
     }
-    
+
     function locked_zotero($f3) {
         $f3->set('page_title', "Error");
         echo \Template::instance()->render('layout/header.html');
@@ -25,7 +27,7 @@ class ZoteroLocalDatabase {
         echo \Template::instance()->render('layout/footer.html');
         exit;
     }
-    
+
     function close_zotero($f3) {
         // D:\xampp\htdocs\public\Zotero-Local-Library-Web\app\ZoteroLocalDatabase.php
         $script = __DIR__;
@@ -34,20 +36,22 @@ class ZoteroLocalDatabase {
         shell_exec($autoit_script);
         sleep(3);
         //echo $_COOKIE["last_url"];
-        if (isset($_COOKIE["last_url"])) {
+        $last_url = $_COOKIE["last_url"];
+        unset($_COOKIE["last_url"]);
+        if (isset($last_url) && $this->endsWith($last_url, "close_zotero") === FALSE) {
             header('Location: ' . $_COOKIE["last_url"]);
-            //unset($_SESSION["last_url"]);
+            
         } else {
             header('Location: ' . $f3->get("BASEURL"));
         }
     }
-    
+
     function start_zotero($f3) {
         if (is_object($f3->db) === FALSE) {
             $f3->db = null;
         }
         setcookie("last_url", $_SERVER['HTTP_REFERER']);
-        
+
         $zotero_path = $f3->get('ZOTERO_PATH');
         $autoit_script = substr(__DIR__, 0, strrpos(__DIR__, "app")) . "autoit\\start-zotero.exe";
         //echo $autoit_script . '"' . $zotero_path . '"';
@@ -56,50 +60,49 @@ class ZoteroLocalDatabase {
         sleep(10);
         $this->locked_zotero($f3);
     }
-        
+
     function item_collection($f3) {
         $this->check_sqlite_lock($f3);
-        
+
         if (isset($_GET["q"])) {
             $this->q = $_GET["q"];
         }
-        
+
         /*
-        if (isset($_GET["tag"])) {
-            $this->tag = $_GET["tag"];
-        }
-        else {
-            $this->tag = "ToReadZH";
-        }
+          if (isset($_GET["tag"])) {
+          $this->tag = $_GET["tag"];
+          }
+          else {
+          $this->tag = "ToReadZH";
+          }
          */
-        
+
         $page = NULL;
         if (is_numeric($f3->get('PARAMS.tag'))) {
             $page = $f3->get('PARAMS.tag');
-        }
-        else if ($f3->get('PARAMS.tag') !== "") {
+        } else if ($f3->get('PARAMS.tag') !== "") {
             $this->tag = $f3->get('PARAMS.tag');
         }
         if (is_numeric($f3->get('PARAMS.page'))) {
             $page = $f3->get('PARAMS.page');
         }
-        
+
         if (is_null($this->tag)) {
             $config_tags = $f3->get('TAGS');
             if (count($config_tags) > 0 && strtolower($config_tags[0]) !== "null") {
                 $this->tag = trim($config_tags[0]);
             }
         }
-        
+
         $page_limit = $f3->get('PAGE_LIMIT');
         $items_count = $this->get_items_count($f3);
         if (is_null($page) || $page > ceil($items_count / $page_limit)) {
             $page = 1;
         }
-        $offset = ($page-1) * $page_limit;
-        
+        $offset = ($page - 1) * $page_limit;
+
         $f3->set('item_collection', $this->get_item_collection($f3, $offset));
-        
+
         $page_title = "All Items";
         if (is_string($this->tag)) {
             $page_title = $this->tag;
@@ -109,7 +112,7 @@ class ZoteroLocalDatabase {
         }
         $f3->set('page_title', $page_title);
         $f3->set('page_number', $page);
-        
+
         $tags_list = $f3->get('TAGS');
         foreach ($tags_list as $key => $value) {
             if (is_null($value) || strtolower($value) === "null") {
@@ -117,31 +120,31 @@ class ZoteroLocalDatabase {
             }
         }
         $f3->set('page_tags', $tags_list);
-        
+
         // -----------------------
-        
+
         echo \Template::instance()->render('layout/header.html');
         echo \Template::instance()->render('layout/menu.html');
-        
+
         $this->pagination($f3, $page, $items_count);
-        
+
         echo \Template::instance()->render('components/item_collection.html');
-        
+
         $this->pagination($f3, $page, $items_count);
-        
+
         echo \Template::instance()->render('layout/footer.html');
     }
-    
+
     // ----------------------------
-    
+
     function item($f3) {
         $this->check_sqlite_lock($f3);
-        
+
         $item_id = intval($f3->get("PARAMS.item_id"));
         //echo $item_id;
         $item_collection = $this->get_item_collection($f3, 0, $item_id);
         $f3->set('item_collection', $item_collection);
-        
+
         // 查詢item的attachments.sql
         $sql = "select 
 replace(itemAttachments.path, 'storage:', '') as attachment_title, 
@@ -155,16 +158,16 @@ and itemAttachments.contentType = 'application/pdf'
 order by attachment_title + 0";
         $rows = $f3->db->exec($sql);
         $f3->set('attachment_collection', $rows);
-        
+
         $f3->set('page_title', $item_collection[0]['item_title'] . ' - Zotero Local Database');
         $f3->set('page_header', $item_collection[0]['item_title']);
-        
+
         if (isset($item_collection[0]['item_link'])) {
             $f3->set('folder_link', $item_collection[0]['item_link']);
         }
-        
+
         // ----------------------
-        
+
         echo \Template::instance()->render('layout/header.html');
         echo \Template::instance()->render('layout/menu.html');
         echo \Template::instance()->render('components/item.html');
@@ -172,30 +175,30 @@ order by attachment_title + 0";
     }
 
     // ----------------------------------------
-    
+
     function pagination($f3, $current_page, $items_count) {
-        
+
         $page_limit = $f3->get('PAGE_LIMIT');
         $page_near_limit = $f3->get('PAGE_NEAR_LIMIT');
-        
+
         // 先計算最多的頁數
         $page_number_last = ceil($items_count / $page_limit);
-        
+
         // --------------------
-        
+
         $pagination_first = array();
         // 大概要4以上才要
         if ($current_page > 1) {
             $pagination_first[] = 1;
         }
         $f3->set('pagination_first', $pagination_first);
-        
+
         $pagination_before_skip = array();
-        if ($current_page - $page_near_limit > (1+1)) {
+        if ($current_page - $page_near_limit > (1 + 1)) {
             $pagination_before_skip[] = "...";
         }
         $f3->set('pagination_before_skip', $pagination_before_skip);
-        
+
         $pagination_before = array();
         for ($i = $page_near_limit; $i > 0; $i--) {
             if ($current_page - $i > 1) {
@@ -203,56 +206,55 @@ order by attachment_title + 0";
             }
         }
         $f3->set('pagination_before', $pagination_before);
-        
+
         $pagination_current = array($current_page);
         $f3->set('pagination_current', $pagination_current);
-        
+
         $pagination_after = array();
-        for ($i = 1; $i < $page_near_limit+1; $i++) {
+        for ($i = 1; $i < $page_near_limit + 1; $i++) {
             if ($current_page + $i < $page_number_last) {
                 $pagination_after[] = $current_page + $i;
             }
         }
         $f3->set('pagination_after', $pagination_after);
-        
+
         $pagination_after_skip = array();
         if ($current_page + $page_near_limit < ($page_number_last) - 1) {
             $pagination_after_skip[] = "...";
         }
         $f3->set('pagination_after_skip', $pagination_after_skip);
-        
+
         $pagination_last = array();
         if ($current_page < $page_number_last) {
             $pagination_last[] = $page_number_last;
         }
         $f3->set('pagination_last', $pagination_last);
-        
+
         if (is_null($this->tag) === FALSE) {
             $f3->set("tag", $this->tag . "/");
-        } 
-        else {
+        } else {
             $f3->set("tag", "");
         }
-        
+
         echo \Template::instance()->render('components/pagination.html');
     }
-    
+
     function get_item_collection_sql($f3) {
         $where_search = "";
         if (is_null($this->q) === FALSE) {
             $where_search = "AND (itemTitle.value LIKE '%" . $this->q . "%' OR itemCreators.item_creators LIKE '%" . $this->q . "%' )";
         }
-        
+
         $tag_join = "";
         if (is_null($this->tag) === FALSE && $this->tag !== "" && strtolower($this->tag) !== "null") {
             $tag_join = "join itemTags using(itemID)
 join tags on tags.tagID = itemTags.tagID and tags.name = '" . $this->tag . "'";
         }
         //echo "<!-- \n\n" . $this->tag . "\n\n -->";
-        
+
         $limit_boot_type = "";
         //$limit_boot_type = "and itemTitle.itemTypeID = 2";
-        
+
         $sql = "SELECT
 itemTitle.itemID AS item_id, 
 itemTitle.value AS item_title, 
@@ -335,28 +337,28 @@ and itemDate.fieldID = 14
 " . $where_search . "
 ORDER BY
 itemTitle.dateModified DESC";
-        
+
         return $sql;
     }
-    
+
     function get_item_collection($f3, $offset = 0, $item_id = NULL) {
         $page_limit = $f3->get('PAGE_LIMIT');
-        
+
         $where_item_id = "";
         if (is_null($item_id) === FALSE) {
             $where_item_id = 'WHERE item_id = ' . $item_id;
             $offset = 0;
         }
-        
+
         $item_collection_sql = $this->get_item_collection_sql($f3);
         $sql = "SELECT * FROM (" . $item_collection_sql . ") as a
 " . $where_item_id . "
 LIMIT " . $offset . ", " . $page_limit;
-        
+
         echo "<!-- \n\n" . $sql . "\n\n -->";
-        
+
         $rows = $f3->db->exec($sql);
-        
+
         for ($i = 0; $i < count($rows); $i++) {
             // 取代搜尋詞彙
             if (is_null($this->q)) {
@@ -364,45 +366,58 @@ LIMIT " . $offset . ", " . $page_limit;
                 $rows[$i]["item_title"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_title"]);
                 $rows[$i]["item_creators"] = str_replace($q, '<b>' . $q . '</b>', $rows[$i]["item_creators"]);
             }
-            
+
             if (is_null($rows[$i]["item_cover_path"]) === FALSE) {
                 // https://fatfreeframework.com/3.6/image
                 $cover_path = mb_convert_encoding($rows[$i]["item_cover_path"], 'big5');
                 $width = 50;
                 $type = 'gif';
-                
+
                 list($width_orig, $height_orig) = getimagesize($cover_path);
                 $aspectRatio = $height_orig / $width_orig;
                 $height = intval($aspectRatio * $width);
-                
+
                 $image_p = imagecreatetruecolor($width, $height);
                 $image = imagecreatefromstring(file_get_contents($cover_path));
-                imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig,$height_orig);
-                
+                imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+
                 ob_start(); // Let's start output buffering.
-                    imagegif($image_p); //This will normally output the image, but because of ob_start(), it won't.
-                    $contents = ob_get_contents(); //Instead, output above is saved to $contents
+                imagegif($image_p); //This will normally output the image, but because of ob_start(), it won't.
+                $contents = ob_get_contents(); //Instead, output above is saved to $contents
                 ob_end_clean(); //End the output buffer.
-                
+
                 $base64 = 'data:image/' . $type . ';base64,' . base64_encode($contents);
-                
+
                 $rows[$i]["item_cover_base64"] = $base64;
             }
         }
-        
+
         return $rows;
     }
-    
+
     function get_items_count($f3) {
-        
+
         $item_collection_sql = $this->get_item_collection_sql($f3);
         $sql = "select count(*) as items_count
 from (" . $item_collection_sql . ") as a";
-        
+
         echo "<!-- \n\n" . $sql . "\n\n -->";
-        
+
         $rows = $f3->db->exec($sql);
-        
+
         return $rows[0]["items_count"];
     }
+
+    function startsWith($haystack, $needle) {
+        $length = strlen($needle);
+        return (substr($haystack, 0, $length) === $needle);
+    }
+
+    function endsWith($haystack, $needle) {
+        $length = strlen($needle);
+
+        return $length === 0 ||
+                (substr($haystack, -$length) === $needle);
+    }
+
 }
