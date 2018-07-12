@@ -25,7 +25,13 @@ class ZoteroLocalDatabase {
         $autoit_script = substr($script, 0, strrpos($script, "app")) . "autoit\\close-zotero.exe";
         //shell_exec('taskkill /F /IM "zotero.exe"');
         shell_exec($autoit_script);
-        header('Location: ' . $f3->get("BASEURL") . '/item_collection');
+        $this->index($f3);
+    }
+    
+    function start_zotero($f3) {
+        $zotero_path = $f3->get('ZOTERO_PATH');
+        shell_exec($zotero_path);
+        $this->index($f3);
     }
         
     function item_collection($f3) {
@@ -267,7 +273,7 @@ left join fields using(fieldID)) as itemDate,
 
 left join 
 (select 
-    replace(itemAttachments.path, 'storage:', '" . $f3->get("ZOTERO_PATH") . "' || '/storage/' || items.key || '/') as item_cover_path, 
+    replace(itemAttachments.path, 'storage:', '" . $f3->get("ZOTERO_DATA_PATH") . "' || '/storage/' || items.key || '/') as item_cover_path, 
     items.key, 
     items.dateModified,
     itemAttachments.parentItemID

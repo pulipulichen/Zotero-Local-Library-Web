@@ -18,10 +18,10 @@ else {
 
 // Database
 global $db;
-$sqlite_path = $f3->get('ZOTERO_PATH') . '\zotero.sqlite';
-$sqlite_journal_path = $f3->get('ZOTERO_PATH') . '\zotero.sqlite-journal';
+$sqlite_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite';
+$sqlite_journal_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite-journal';
 if (file_exists($sqlite_journal_path) === FALSE) {
-    $zotero_sqlite = $f3->get('ZOTERO_PATH') . '\zotero.sqlite';
+    $zotero_sqlite = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite';
     $db = new \DB\SQL('sqlite:' . $zotero_sqlite);
     $f3->db = $db;
 }
