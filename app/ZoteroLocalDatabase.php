@@ -10,6 +10,9 @@ class ZoteroLocalDatabase {
     
     function check_sqlite_lock($f3) {
         if (is_object($f3->db) === FALSE) {
+            $url =  "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+            //$_SESSION["last_url"] = $url;
+            setcookie("last_url", $url);
             $this->locked_zotero($f3);
         }
     }
@@ -30,20 +33,27 @@ class ZoteroLocalDatabase {
         //shell_exec('taskkill /F /IM "zotero.exe"');
         shell_exec($autoit_script);
         sleep(3);
-        header('Location: ' . $f3->get("BASEURL"));
+        //echo $_COOKIE["last_url"];
+        if (isset($_COOKIE["last_url"])) {
+            header('Location: ' . $_COOKIE["last_url"]);
+            //unset($_SESSION["last_url"]);
+        } else {
+            header('Location: ' . $f3->get("BASEURL"));
+        }
     }
     
     function start_zotero($f3) {
         if (is_object($f3->db) === FALSE) {
             $f3->db = null;
         }
+        setcookie("last_url", $_SERVER['HTTP_REFERER']);
         
         $zotero_path = $f3->get('ZOTERO_PATH');
         $autoit_script = substr(__DIR__, 0, strrpos(__DIR__, "app")) . "autoit\\start-zotero.exe";
         //echo $autoit_script . '"' . $zotero_path . '"';
         shell_exec($autoit_script . ' "' . $zotero_path . '"');
         //pclose(popen('start /B cmd /C "' . $zotero_path . ' >NUL 2>NUL"', 'r'));
-        
+        sleep(30);
         $this->locked_zotero($f3);
     }
         

@@ -4,4 +4,4 @@
 #include <WinAPIFiles.au3>
 
 WinClose("[Title:Zotero; Class:MozillaWindowClass]", "")
-Sleep(3000)
+;Sleep(3000)
