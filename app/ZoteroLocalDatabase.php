@@ -14,7 +14,9 @@ class ZoteroLocalDatabase {
         if (is_object($f3->db) === FALSE) {
             $url = "//{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
             //$_SESSION["last_url"] = $url;
-            setcookie("last_url", $url);
+            if ($this->endsWith($url, "close_zotero") === FALSE) {
+                setcookie("last_url", $url);
+            }
             $this->locked_zotero($f3);
         }
     }
@@ -50,7 +52,10 @@ class ZoteroLocalDatabase {
         if (is_object($f3->db) === FALSE) {
             $f3->db = null;
         }
-        setcookie("last_url", $_SERVER['HTTP_REFERER']);
+        $url = $_SERVER['HTTP_REFERER'];
+        if ($this->endsWith($url, "close_zotero") === FALSE) {
+            setcookie("last_url", $url);
+        }
 
         $zotero_path = $f3->get('ZOTERO_PATH');
         $autoit_script = substr(__DIR__, 0, strrpos(__DIR__, "app")) . "autoit\\start-zotero.exe";
