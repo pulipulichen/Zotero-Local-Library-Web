@@ -41,7 +41,7 @@ class ZoteroLocalDatabase {
         $last_url = $_COOKIE["last_url"];
         unset($_COOKIE["last_url"]);
         if (isset($last_url) && $this->endsWith($last_url, "close_zotero") === FALSE) {
-            header('Location: ' . $_COOKIE["last_url"]);
+            header('Location: ' . $last_url);
             
         } else {
             header('Location: ' . $f3->get("BASEURL"));

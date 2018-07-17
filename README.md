@@ -6,6 +6,8 @@ A PHP website to search Zotero's local database (zotero.sqlite).
 - ToRead, ReadSkip, ReadFinish標籤的變化
 - 搜尋要能搜尋note裡面的文字
 - [book] [journal & conference]
+- 能不能給我抽取PDF的圖片啊？
+- 如果連線的話，給予快取，如果未連線，取出快取，再讓他決定是否要重連
 
 # Test
 - 王者歸來: WEKA機器學習與大數據聖經
