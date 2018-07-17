@@ -317,7 +317,7 @@ left join
 
 left join 
 (select 
-    replace(itemAttachments.path, 'storage:', '" . $f3->get("ZOTERO_DATA_PATH") . "' || '/storage/' || items.key || '/') as item_cover_pdf_path, 
+    replace(min(itemAttachments.path), 'storage:', '" . $f3->get("ZOTERO_DATA_PATH") . "' || '/storage/' || items.key || '/') as item_cover_pdf_path, 
     items.key, 
     items.dateModified,
     itemAttachments.parentItemID
@@ -326,7 +326,7 @@ left join
     where
     (contentType = 'application/pdf')
     group by itemAttachments.parentItemID
-    order by itemAttachments.path DESC) as itemCoverPDF  on itemCreators.itemID = itemCoverPDF.parentItemID
+    order by itemAttachments.path ASC) as itemCoverPDF on itemCreators.itemID = itemCoverPDF.parentItemID
 
 left join
 (select 
@@ -412,29 +412,32 @@ LIMIT " . $offset . ", " . $page_limit;
                     $path = $rows[$i]["item_cover_pdf_path"];
                     $path = str_replace("/", "\\", $path);
                     //$path = mb_convert_encoding($path, 'big5');
-                    $filesize = 1000000;
-                    if (filesize(mb_convert_encoding($path, 'big5')) < $filesize) {
-                        $base_path = __DIR__;
-                        //echo __DIR__;
-                        $base_path = substr($base_path, 0, strrpos($base_path, "\\"));
-                        $convert_path = $base_path . "\\imagemagick\\convert.exe";
+                    $filesize = 10000000;
+                    //echo filesize(mb_convert_encoding($path, 'big5'));
+                        if (@filesize(mb_convert_encoding($path, 'big5')) < $filesize) {
+                            $base_path = __DIR__;
+                            //echo __DIR__;
+                            $base_path = substr($base_path, 0, strrpos($base_path, "\\"));
+                            $convert_path = $base_path . "\\imagemagick\\convert.exe";
 
-                        $cmd = '"' . $convert_path . '" "' . $path . '"  -flatten -resize 50x50 cover.gif';
-                        //$cmd = mb_convert_encoding($cmd, 'big5');
-                        //echo $cmd;
-                        //exec($cmd);
+                            $cover_path = $base_path . "\\tmp\\cover.gif";
+                            $cmd = '"' . $convert_path . '" "' . $path . '"[0]  -flatten -resize 50x50 "' . $cover_path . '"';
+                            //echo $cmd;
+                            $cmd = mb_convert_encoding($cmd, 'big5');
+                            
+                            //exec($cmd);
 
-                        //$rows[$i]["item_cover_pdf_path"] = filesize($path);
+                            //$rows[$i]["item_cover_pdf_path"] = filesize($path);
 
-                        exec($cmd);
-                        $cover_path = $base_path . "\\cover.gif";
-                        if (is_file($cover_path)) {
-                            //echo $cover_path;
-                            $base64 = $this->path_to_base64($cover_path);
-                            $cache->set($cache_key, $base64);
-                            unlink($cover_path);
+                            exec($cmd);
+                            //$cover_path = $base_path . "\\cover.gif";
+                            if (is_file($cover_path)) {
+                                //echo $cover_path;
+                                $base64 = $this->path_to_base64($cover_path);
+                                $cache->set($cache_key, $base64);
+                                unlink($cover_path);
+                            }
                         }
-                    }
                 }
                 $rows[$i]["item_cover_base64"] = $base64;
             }
