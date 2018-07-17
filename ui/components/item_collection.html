@@ -4,7 +4,7 @@
             
             
             <div class="image" style="width: 50px;">
-                <check if="{{ is_null(@item.item_cover_path) }}">
+                <check if="{{ is_null(@item.item_cover_base64) }}">
                     <true>
                         <img src="{{ @BASEURL }}/ui/images/book_placeholder.png">
                     </true>

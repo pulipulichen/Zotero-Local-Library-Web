@@ -267,6 +267,7 @@ itemCreators.item_creators AS item_creators,
 substr(itemDate.value, instr(itemDate.value, ' ') + 1) AS item_date,
 itemTitle.dateModified AS item_modified_date,
 itemCover.item_cover_path AS item_cover_path,
+itemCoverPDF.item_cover_pdf_path AS item_cover_pdf_path,
 ifnull(item_attachment_count, 0) AS item_attachment_count,
 itemLink.value as item_link
 FROM
@@ -313,6 +314,19 @@ left join
     (contentType = 'image/png' or contentType = 'image/gif' or contentType = 'image/jpeg')
     group by itemAttachments.parentItemID
     order by dateModified DESC) as itemCover on itemCreators.itemID = itemCover.parentItemID
+
+left join 
+(select 
+    replace(itemAttachments.path, 'storage:', '" . $f3->get("ZOTERO_DATA_PATH") . "' || '/storage/' || items.key || '/') as item_cover_pdf_path, 
+    items.key, 
+    items.dateModified,
+    itemAttachments.parentItemID
+    from itemAttachments
+    left join items using (itemID)
+    where
+    (contentType = 'application/pdf')
+    group by itemAttachments.parentItemID
+    order by itemAttachments.path DESC) as itemCoverPDF  on itemCreators.itemID = itemCoverPDF.parentItemID
 
 left join
 (select 
@@ -363,6 +377,7 @@ LIMIT " . $offset . ", " . $page_limit;
         echo "<!-- \n\n" . $sql . "\n\n -->";
 
         $rows = $f3->db->exec($sql);
+        $cache = \Cache::instance();
 
         for ($i = 0; $i < count($rows); $i++) {
             // 取代搜尋詞彙
@@ -373,31 +388,90 @@ LIMIT " . $offset . ", " . $page_limit;
             }
 
             if (is_null($rows[$i]["item_cover_path"]) === FALSE) {
-                // https://fatfreeframework.com/3.6/image
-                $cover_path = mb_convert_encoding($rows[$i]["item_cover_path"], 'big5');
-                $width = 50;
-                $type = 'gif';
+                // 檢查cache
+                $cache_key = "item_cover_path" . $this->path_to_key($rows[$i]["item_cover_path"]);
+                if ($cache->exists($cache_key)) {
+                    $base64 = $cache->get($cache_key);
+                }
+                else {
+                    // https://fatfreeframework.com/3.6/image
+                    $cover_path = mb_convert_encoding($rows[$i]["item_cover_path"], 'big5');
+                    $base64 = $this->path_to_base64($cover_path);
+                    $cache->set($cache_key, $base64);
+                }
 
-                list($width_orig, $height_orig) = getimagesize($cover_path);
-                $aspectRatio = $height_orig / $width_orig;
-                $height = intval($aspectRatio * $width);
+                $rows[$i]["item_cover_base64"] = $base64;
+            } else if (is_null($rows[$i]["item_cover_pdf_path"]) === FALSE) {
+                $cache_key = "item_cover_path" . $this->path_to_key($rows[$i]["item_cover_pdf_path"]);
+                $base64 = null;
+                if ($cache->exists($cache_key)) {
+                    $base64 = $cache->get($cache_key);
+                }
+                else {
+                    //$path = "D:/OUTTY_DOCUMENT/Zotero/storage/RZQ6JEY7/A5.182 文本发生学_11549249.pdf";
+                    $path = $rows[$i]["item_cover_pdf_path"];
+                    $path = str_replace("/", "\\", $path);
+                    //$path = mb_convert_encoding($path, 'big5');
+                    $filesize = 1000000;
+                    if (filesize(mb_convert_encoding($path, 'big5')) < $filesize) {
+                        $base_path = __DIR__;
+                        //echo __DIR__;
+                        $base_path = substr($base_path, 0, strrpos($base_path, "\\"));
+                        $convert_path = $base_path . "\\imagemagick\\convert.exe";
 
-                $image_p = imagecreatetruecolor($width, $height);
-                $image = imagecreatefromstring(file_get_contents($cover_path));
-                imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+                        $cmd = '"' . $convert_path . '" "' . $path . '"  -flatten -resize 50x50 cover.gif';
+                        //$cmd = mb_convert_encoding($cmd, 'big5');
+                        //echo $cmd;
+                        //exec($cmd);
 
-                ob_start(); // Let's start output buffering.
-                imagegif($image_p); //This will normally output the image, but because of ob_start(), it won't.
-                $contents = ob_get_contents(); //Instead, output above is saved to $contents
-                ob_end_clean(); //End the output buffer.
+                        //$rows[$i]["item_cover_pdf_path"] = filesize($path);
 
-                $base64 = 'data:image/' . $type . ';base64,' . base64_encode($contents);
-
+                        exec($cmd);
+                        $cover_path = $base_path . "\\cover.gif";
+                        if (is_file($cover_path)) {
+                            //echo $cover_path;
+                            $base64 = $this->path_to_base64($cover_path);
+                            $cache->set($cache_key, $base64);
+                            unlink($cover_path);
+                        }
+                    }
+                }
                 $rows[$i]["item_cover_base64"] = $base64;
             }
         }
 
         return $rows;
+    }
+    
+    function path_to_key($path) {
+        $path = str_replace("/", "\\", $path);
+        $parts = explode("\\", $path);
+        foreach ($parts AS $key => $part) {
+            if ($part === "storage") {
+                return $parts[($key+1)];
+            }
+        }
+    }
+    
+    function path_to_base64($cover_path) {
+        $width = 50;
+        $type = 'gif';
+
+        list($width_orig, $height_orig) = getimagesize($cover_path);
+        $aspectRatio = $height_orig / $width_orig;
+        $height = intval($aspectRatio * $width);
+
+        $image_p = imagecreatetruecolor($width, $height);
+        $image = imagecreatefromstring(file_get_contents($cover_path));
+        imagecopyresampled($image_p, $image, 0, 0, 0, 0, $width, $height, $width_orig, $height_orig);
+
+        ob_start(); // Let's start output buffering.
+        imagegif($image_p); //This will normally output the image, but because of ob_start(), it won't.
+        $contents = ob_get_contents(); //Instead, output above is saved to $contents
+        ob_end_clean(); //End the output buffer.
+
+        $base64 = 'data:image/' . $type . ';base64,' . base64_encode($contents);
+        return $base64;
     }
 
     function get_items_count($f3) {
