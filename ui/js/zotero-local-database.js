@@ -10,6 +10,8 @@ $(function () {
     });
     
     $('.ui.dropdown').dropdown();
+    
+    adjust_attachment_link();
 });
 
 item_open_all = function () {
@@ -20,4 +22,43 @@ item_open_all = function () {
             }, _i * 5000)
         });
     }
+};
+
+adjust_attachment_link = function () {
+    $(".attachments .attachment").each(function (_key, _item) {
+        console.log(_key);
+        _item = $(_item);
+        var _title = _item.attr("title");
+        var _attachment_key = _item.attr("data-attachment-key");
+        
+        var _prefix = "https://drive.google.com/drive/u/0/search?q=type:folder%20";
+        if (is_android()) {
+            _prefix = "http://gdrive.search/";
+        }
+        var _href = _prefix + _attachment_key;
+        
+        _item.attr("href", _href); 
+        
+        /*
+        if (_title.length > 20 || _title.split(" - ").length >= 2) {
+            var _prefix = "https://drive.google.com/drive/u/0/search?q=";
+            if (is_android()) {
+                _prefix = "http://gdrive.search/";
+            }
+            var _href = _prefix + encodeURIComponent(_title);
+            _item.attr("href", _href); 
+        }
+        */
+    });
+};
+
+is_android = function () {
+    var ua = navigator.userAgent.toLowerCase();
+    return ua.indexOf("android") > -1; //&& ua.indexOf("mobile");
+    //
+    //if(isAndroid) {
+      // Do something!
+      // Redirect to Android-site?
+      //window.location = 'http://android.davidwalsh.name';
+    //}
 };

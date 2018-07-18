@@ -51,7 +51,8 @@
     <repeat group="{{ @attachment_collection }}" value="{{ @attachment }}">
         <!-- <a class="item" target="_blank"
                href="http://pgb-share-to-search-google-drive.pulipuli.info/{{ @attachment.attachment_key }}"> -->
-        <a class="item" target="_blank"
+        <a class="item attachment" target="_blank" data-attachment-key="{{ @attachment.attachment_key }}"
+           title="{{ @attachment.attachment_title }}"
                href="http://gdrive.search/{{ @attachment.attachment_key }}">
             <i class="file pdf outline icon"></i>
             <div class="content">
