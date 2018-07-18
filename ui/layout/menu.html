@@ -44,23 +44,19 @@
         </false>
     </check>
     <div class="right menu">
-        <!--
-        <check if="{{ isset(@folder_link) }}">
+        <check if="{{ @is_sqlite_locked=='true' }}">
             <true>
-                <a class="item" href="{{ @folder_link }}" target="google_drive_reading">
-                    <i class="folder icon"></i>
+                <a class="item stop-zotero" href="{{ @BASEURL }}/close_zotero">
+                    <i class="stop circle outline icon"></i>
                 </a>
             </true>
             <false>
-                <a class="item" href="{{ @GOOGLE_DRIVE_READING_FOLDER_URL }}" target="google_drive_reading">
-                    <i class="folder icon"></i>
+                <a class="item start-zotero" href="{{ @BASEURL }}/start_zotero">
+                    <i class="play circle outline icon"></i>
                 </a>
             </false>
         </check>
-        -->
-        <a class="item start-zotero" href="{{ @BASEURL }}/start_zotero">
-            <i class="play circle outline icon"></i>
-        </a>
+            
             
         <form class="item" method="GET">
             <div class="ui icon input search-input">

@@ -3,7 +3,7 @@
 class ZoteroLocalDatabase {
 
     function index($f3) {
-        $this->check_sqlite_lock($f3);
+        //$this->check_sqlite_lock($f3);
         header('Location: ' . $f3->get("BASEURL") . '/item_collection');
     }
 
@@ -19,6 +19,10 @@ class ZoteroLocalDatabase {
             }
             $this->locked_zotero($f3);
         }
+    }
+    
+    function is_sqlite_locked($f3) {
+        return (is_object($f3->db) === FALSE);
     }
 
     function locked_zotero($f3) {
@@ -38,8 +42,10 @@ class ZoteroLocalDatabase {
         shell_exec($autoit_script);
         sleep(3);
         //echo $_COOKIE["last_url"];
-        $last_url = $_COOKIE["last_url"];
-        unset($_COOKIE["last_url"]);
+        //$last_url = $_COOKIE["last_url"];
+        //unset($_COOKIE["last_url"]);
+        $last_url = $_SERVER['HTTP_REFERER'];
+        
         if (isset($last_url) && $this->endsWith($last_url, "close_zotero") === FALSE) {
             header('Location: ' . $last_url);
             
@@ -63,11 +69,13 @@ class ZoteroLocalDatabase {
         shell_exec($autoit_script . ' "' . $zotero_path . '"');
         //pclose(popen('start /B cmd /C "' . $zotero_path . ' >NUL 2>NUL"', 'r'));
         sleep(10);
-        $this->locked_zotero($f3);
+        //$this->locked_zotero($f3);
+        
+        header("Location: " . $url);
     }
 
     function item_collection($f3) {
-        $this->check_sqlite_lock($f3);
+        //$this->check_sqlite_lock($f3);
 
         if (isset($_GET["q"])) {
             $this->q = $_GET["q"];
@@ -128,6 +136,13 @@ class ZoteroLocalDatabase {
 
         // -----------------------
 
+        if ($this->is_sqlite_locked($f3)) {
+            $f3->set('is_sqlite_locked', "true");
+        }
+        else {
+            $f3->set('is_sqlite_locked', "false");
+        }
+        
         echo \Template::instance()->render('layout/header.html');
         echo \Template::instance()->render('layout/menu.html');
 
@@ -142,14 +157,19 @@ class ZoteroLocalDatabase {
 
     // ----------------------------
 
-    function item($f3) {
-        $this->check_sqlite_lock($f3);
-
-        $item_id = intval($f3->get("PARAMS.item_id"));
-        //echo $item_id;
-        $item_collection = $this->get_item_collection($f3, 0, $item_id);
-        $f3->set('item_collection', $item_collection);
-
+    function get_item($f3, $item_id) {
+        $cache = \Cache::instance();
+        $key = "item_" . md5($_SERVER['REQUEST_URI']);
+        if ($this->is_sqlite_locked($f3)) {
+            if ($cache->exists($key)) {
+                return $cache->get($key);
+            }
+            else {
+                $this->locked_zotero($f3);
+                return;
+            }
+        }
+        
         // 查詢item的attachments.sql
         $sql = "select 
 replace(itemAttachments.path, 'storage:', '') as attachment_title, 
@@ -162,6 +182,23 @@ itemAttachments.parentItemID = " . $item_id . "
 and itemAttachments.contentType = 'application/pdf'
 order by attachment_title + 0";
         $rows = $f3->db->exec($sql);
+        
+        $cache->set($key, $rows);
+        
+        return $rows;
+    }
+    
+    function item($f3) {
+        //$this->check_sqlite_lock($f3);
+
+        $item_id = intval($f3->get("PARAMS.item_id"));
+        //echo $item_id;
+
+        $item_collection = $this->get_item_collection($f3, 0, $item_id);
+
+        $f3->set('item_collection', $item_collection);
+        $rows = $this->get_item($f3, $item_id);
+        
         $f3->set('attachment_collection', $rows);
 
         $f3->set('page_title', $item_collection[0]['item_title'] . ' - Zotero Local Database');
@@ -173,6 +210,13 @@ order by attachment_title + 0";
 
         // ----------------------
 
+        if ($this->is_sqlite_locked($f3)) {
+            $f3->set('is_sqlite_locked', "true");
+        }
+        else {
+            $f3->set('is_sqlite_locked', "false");
+        }
+        
         echo \Template::instance()->render('layout/header.html');
         echo \Template::instance()->render('layout/menu.html');
         echo \Template::instance()->render('components/item.html');
@@ -359,8 +403,22 @@ itemTitle.dateModified DESC";
 
         return $sql;
     }
-
+    
     function get_item_collection($f3, $offset = 0, $item_id = NULL) {
+        $cache = \Cache::instance();
+        $key = "item_collection_" . md5($_SERVER['REQUEST_URI']);
+        if ($this->is_sqlite_locked($f3)) {
+            if ($cache->exists($key)) {
+                return $cache->get($key);
+            }
+            else {
+                $this->locked_zotero($f3);
+                return;
+            }
+        }
+        
+        // ---------------
+        
         $page_limit = $f3->get('PAGE_LIMIT');
 
         $where_item_id = "";
@@ -374,10 +432,9 @@ itemTitle.dateModified DESC";
 " . $where_item_id . "
 LIMIT " . $offset . ", " . $page_limit;
 
-        echo "<!-- \n\n" . $sql . "\n\n -->";
+        //echo "<!-- \n\n" . $sql . "\n\n -->";
 
         $rows = $f3->db->exec($sql);
-        $cache = \Cache::instance();
 
         for ($i = 0; $i < count($rows); $i++) {
             // 取代搜尋詞彙
@@ -442,7 +499,8 @@ LIMIT " . $offset . ", " . $page_limit;
                 $rows[$i]["item_cover_base64"] = $base64;
             }
         }
-
+        
+        $cache->set($key, $rows);
         return $rows;
     }
     
@@ -478,16 +536,30 @@ LIMIT " . $offset . ", " . $page_limit;
     }
 
     function get_items_count($f3) {
-
+        $cache = \Cache::instance();
+        $key = "item_count_" . md5($_SERVER['REQUEST_URI']);
+        if ($this->is_sqlite_locked($f3)) {
+            if ($cache->exists($key)) {
+                return $cache->get($key);
+            }
+            else {
+                $this->locked_zotero($f3);
+                return;
+            }
+        }
+        
         $item_collection_sql = $this->get_item_collection_sql($f3);
         $sql = "select count(*) as items_count
 from (" . $item_collection_sql . ") as a";
 
-        echo "<!-- \n\n" . $sql . "\n\n -->";
+        //echo "<!-- \n\n" . $sql . "\n\n -->";
 
         $rows = $f3->db->exec($sql);
+        $rows = $rows[0]["items_count"];
+        
+        $cache->set($key, $rows);
 
-        return $rows[0]["items_count"];
+        return $rows;
     }
 
     function startsWith($haystack, $needle) {
