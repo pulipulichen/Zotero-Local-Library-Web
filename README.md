@@ -4,9 +4,10 @@ A PHP website to search Zotero's local database (zotero.sqlite).
 # TODO list
 - 密碼功能
 - ToRead, ReadSkip, ReadFinish標籤的變化
+- 缺少歷史記錄
+
+# 不採用TODO
 - 搜尋要能搜尋note裡面的文字
-- [book] [journal & conference]
-- 能不能給我抽取PDF的圖片啊？
 
 # Test
 - 王者歸來: WEKA機器學習與大數據聖經
@@ -19,6 +20,7 @@ A PHP website to search Zotero's local database (zotero.sqlite).
 # Development tips
 - Semantic UI: https://semantic-ui.com/usage/layout.html
 - Fat-Free Framework: https://fatfreeframework.com/3.6/api-reference
+- Base64: https://www.base64-image.de/
 
 # Google Drive tips
 - Create file's symbolic link: `Shift + Z` ([Google 雲端硬碟整理檔案密技！複製檔案資料夾「分身」實測](http://www.playpcesor.com/2017/08/google-drive-copy.html))
