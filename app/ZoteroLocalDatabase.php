@@ -180,7 +180,7 @@ left join items using (itemID)
 where
 itemAttachments.parentItemID = " . $item_id . " 
 and itemAttachments.contentType = 'application/pdf'
-order by attachment_title + 0";
+order by attachment_title";
         $rows = $f3->db->exec($sql);
         
         $cache->set($key, $rows);

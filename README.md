@@ -1,6 +1,8 @@
 # Zotero-Local-Library-Web
 A PHP website to search Zotero's local database (zotero.sqlite).
 
+https://github.com/pulipulichen/Zotero-Local-Library-Web
+
 # TODO list
 - 密碼功能
 - ToRead, ReadSkip, ReadFinish標籤的變化
