@@ -156,10 +156,31 @@ class ZoteroLocalDatabase {
     }
 
     // ----------------------------
+    function t($f3) {
+      echo 't';
+    }
+    
+    function load_db($f3) {
+      
 
+      //$sqlite_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite';
+      //$sqlite_journal_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite-journal';
+      //if (file_exists($sqlite_journal_path) === FALSE) {
+      $zotero_sqlite = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite';
+      
+      $dbhandle = sqlite_open($zotero_sqlite);
+      sqlite_busy_timeout($dbhandle, 3000); // set timeout to 10 seconds
+          
+          
+          $db = new \DB\SQL('sqlite:' . $zotero_sqlite);
+          $f3->db = $db;
+      //}
+    }
+    
     function get_item($f3, $item_id) {
         $cache = \Cache::instance();
         $key = "item_" . md5($_SERVER['REQUEST_URI']);
+        $this->load_db($f3);
         if ($this->is_sqlite_locked($f3)) {
             if ($cache->exists($key)) {
                 return $cache->get($key);

@@ -9,3 +9,4 @@ $f3->route('GET /item_collection', 'ZoteroLocalDatabase->item_collection', $cach
 $f3->route('GET /item_collection/@tag', 'ZoteroLocalDatabase->item_collection', $cache_timeout);
 $f3->route('GET /item_collection/@tag/@page', 'ZoteroLocalDatabase->item_collection', $cache_timeout);
 $f3->route('GET /item/@item_id', 'ZoteroLocalDatabase->item', $cache_timeout);
+$f3->route('GET /t', 'ZoteroLocalDatabase->t', $cache_timeout);
