@@ -22,7 +22,9 @@ class ZoteroLocalDatabase {
     }
     
     function is_sqlite_locked($f3) {
-        return (is_object($f3->db) === FALSE);
+        //$zotero_path = $f3->get('ZOTERO_PATH');
+        $autoit_script = substr(__DIR__, 0, strrpos(__DIR__, "app")) . "autoit\\check-zotero-process-existed.exe";
+        return (exec($autoit_script) === 'true');
     }
 
     function locked_zotero($f3) {
@@ -108,6 +110,8 @@ class ZoteroLocalDatabase {
         }
 
         $page_limit = $f3->get('PAGE_LIMIT');
+        
+        $this->load_db($f3);
         $items_count = $this->get_items_count($f3);
         if (is_null($page) || $page > ceil($items_count / $page_limit)) {
             $page = 1;
@@ -136,6 +140,7 @@ class ZoteroLocalDatabase {
 
         // -----------------------
 
+        $this->load_db($f3);
         if ($this->is_sqlite_locked($f3)) {
             $f3->set('is_sqlite_locked', "true");
         }
@@ -157,24 +162,22 @@ class ZoteroLocalDatabase {
 
     // ----------------------------
     function t($f3) {
-      echo 't';
+      if ($this->is_sqlite_locked($f3) === false) {
+        echo "false";
+      } 
+      else {
+        echo "true";
+      }
     }
     
     function load_db($f3) {
+      if ($this->is_sqlite_locked($f3) === true) {
+        return;
+      }
       
-
-      //$sqlite_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite';
-      //$sqlite_journal_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite-journal';
-      //if (file_exists($sqlite_journal_path) === FALSE) {
       $zotero_sqlite = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite';
-      
-      $dbhandle = sqlite_open($zotero_sqlite);
-      sqlite_busy_timeout($dbhandle, 3000); // set timeout to 10 seconds
-          
-          
-          $db = new \DB\SQL('sqlite:' . $zotero_sqlite);
-          $f3->db = $db;
-      //}
+      $db = new \DB\SQL('sqlite:' . $zotero_sqlite);
+      $f3->db = $db;
     }
     
     function get_item($f3, $item_id) {
@@ -210,6 +213,8 @@ order by attachment_title";
     }
     
     function item($f3) {
+        $this->load_db($f3);
+        
         //$this->check_sqlite_lock($f3);
 
         $item_id = intval($f3->get("PARAMS.item_id"));

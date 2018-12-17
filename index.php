@@ -34,7 +34,7 @@ $sqlite_journal_path = $f3->get('ZOTERO_DATA_PATH') . '\zotero.sqlite-journal';
 //}
  */
 
-set_time_limit(3);
+//set_time_limit(3);
 
 include 'routing.php';
 
