@@ -3,8 +3,8 @@
 #include <MsgBoxConstants.au3>
 #include <WinAPIFiles.au3>
 
-WinClose("[Title:Zotero; Class:MozillaWindowClass]", "")
-WinClose("[Title:進階搜尋; Class:MozillaWindowClass]", "")
+;WinClose("[Title:Zotero; Class:MozillaWindowClass]", "")
+;WinClose("[Title:進階搜尋; Class:MozillaWindowClass]", "")
 
 Local $sFilePath = "..\\config.ini"
 Local $sRead = IniRead($sFilePath, "globals", "ZOTERO_DATA_PATH", "Zotero\zotero.sqlite")

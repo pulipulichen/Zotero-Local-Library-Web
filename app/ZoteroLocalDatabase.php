@@ -195,6 +195,7 @@ class ZoteroLocalDatabase {
         }
         
         // 查詢item的attachments.sql
+        /*
         $sql = "select 
 replace(itemAttachments.path, 'storage:', '') as attachment_title, 
 items.key as attachment_key, 
@@ -205,6 +206,33 @@ where
 itemAttachments.parentItemID = " . $item_id . " 
 and itemAttachments.contentType = 'application/pdf'
 order by attachment_title";
+         */
+        $sql = "select 
+replace(itemAttachments.path, 'storage:', '') as attachment_title, 
+instr(replace(itemAttachments.path, 'storage:', ''), '.') as point, 
+instr(replace(itemAttachments.path, 'storage:', ''), '-') as hyper, 
+substr(replace(itemAttachments.path, 'storage:', ''), 0, instr(replace(itemAttachments.path, 'storage:', ''), '.')) as no_all,
+CASE instr(replace(itemAttachments.path, 'storage:', ''), '-')
+	when 0
+		then substr(replace(itemAttachments.path, 'storage:', ''), 0, instr(replace(itemAttachments.path, 'storage:', ''), '.'))
+	ELSE
+		substr(replace(itemAttachments.path, 'storage:', ''), 0, instr(replace(itemAttachments.path, 'storage:', ''), '-'))
+END as no_1,
+CASE instr(replace(itemAttachments.path, 'storage:', ''), '-')
+	when 0
+		then NULL
+	ELSE
+		substr(replace(itemAttachments.path, 'storage:', ''), instr(replace(itemAttachments.path, 'storage:', ''), '-') + 1, instr(replace(itemAttachments.path, 'storage:', ''), '.') - instr(replace(itemAttachments.path, 'storage:', ''), '-') - 1)
+END as no_2,
+items.key as attachment_key, 
+items.dateModified as attachment_date_modified
+from itemAttachments
+left join items using (itemID)
+where
+itemAttachments.parentItemID = " . $item_id . " 
+and itemAttachments.contentType = 'application/pdf'
+order by no_1 + 0, no_2 + 0";
+        //echo $sql;
         $rows = $f3->db->exec($sql);
         
         $cache->set($key, $rows);
