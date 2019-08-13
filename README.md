@@ -1,7 +1,8 @@
 # Zotero-Local-Library-Web
 A PHP website to search Zotero's local database (zotero.sqlite).
 
-https://github.com/pulipulichen/Zotero-Local-Library-Web
+- Project: https://github.com/pulipulichen/Zotero-Local-Library-Web
+- Issues: https://github.com/pulipulichen/Zotero-Local-Library-Web/issues
 
 # TODO list
 - 密碼功能
