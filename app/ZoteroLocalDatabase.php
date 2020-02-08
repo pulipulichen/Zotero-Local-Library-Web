@@ -525,6 +525,7 @@ LIMIT " . $offset . ", " . $page_limit;
                     //$path = mb_convert_encoding($path, 'big5');
                     $filesize = 10000000;
                     //echo filesize(mb_convert_encoding($path, 'big5'));
+                    try {
                         if (@filesize(mb_convert_encoding($path, 'big5')) < $filesize) {
                             $base_path = __DIR__;
                             //echo __DIR__;
@@ -549,6 +550,10 @@ LIMIT " . $offset . ", " . $page_limit;
                                 unlink($cover_path);
                             }
                         }
+                    }
+                    catch (Exception $e) {
+                      // something wrong
+                    }
                 }
                 $rows[$i]["item_cover_base64"] = $base64;
             }
