@@ -523,10 +523,12 @@ LIMIT " . $offset . ", " . $page_limit;
                     $path = $rows[$i]["item_cover_pdf_path"];
                     $path = str_replace("/", "\\", $path);
                     //$path = mb_convert_encoding($path, 'big5');
-                    $filesize = 10000000;
+                    $filesizeLimit = 10000000000;
                     //echo filesize(mb_convert_encoding($path, 'big5'));
+                    $big5Path = mb_convert_encoding($path, 'big5');
                     try {
-                        if (@filesize(mb_convert_encoding($path, 'big5')) < $filesize) {
+                      $filesize = @filesize($big5Path);
+                        if ($filesize < $filesizeLimit) {
                             $base_path = __DIR__;
                             //echo __DIR__;
                             $base_path = substr($base_path, 0, strrpos($base_path, "\\"));
@@ -553,6 +555,7 @@ LIMIT " . $offset . ", " . $page_limit;
                     }
                     catch (Exception $e) {
                       // something wrong
+                      echo $path;
                     }
                 }
                 $rows[$i]["item_cover_base64"] = $base64;
